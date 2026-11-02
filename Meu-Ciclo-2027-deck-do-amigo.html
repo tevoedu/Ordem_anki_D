@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f1eb">
+<meta name="description" content="Planejamento inteligente de estudos para concursos públicos.">
+<title>Meu Ciclo — Planejamento de Estudos</title>
+<style>
+:root{
+ --canvas:#f3f1eb;--paper:#fffefa;--surface:#ffffff;--surface-soft:#f8f7f2;
+ --ink:#1e2b3c;--ink-2:#33445a;--muted:#6f7b89;--muted-2:#929ba5;
+ --line:#e7e3da;--blue:#3157a5;--blue-strong:#244786;--blue-soft:#edf2fc;
+ --green:#26765f;--green-soft:#eaf4ef;--coral:#d46f59;--coral-soft:#fbefeb;
+ --gold:#b87b2f;--gold-soft:#faf2e4;--red:#b84c50;--red-soft:#fff0ef;
+ --shadow:0 8px 24px rgba(36,45,58,.055);--shadow-lg:0 16px 42px rgba(36,45,58,.10);
+ --radius:20px;--radius-sm:14px;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas);color-scheme:light;scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--canvas);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.01em}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #7c9cdd;outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.shell{min-height:100vh}
+.sidebar{display:none}
+.app{width:100%;max-width:1040px;margin:0 auto;padding:0 16px calc(102px + env(safe-area-inset-bottom))}
+header.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:42px;height:42px;border-radius:13px;background:var(--ink);color:#f6f1e7;display:grid;place-items:center;font-weight:850;font-size:15px;letter-spacing:-1px;box-shadow:0 5px 12px #1e2b3c20}
+.brand h1{font-size:18px;line-height:1.1;margin:0;font-weight:850;letter-spacing:-.7px}
+.brand p{font-size:11px;margin:4px 0 0;color:var(--muted);letter-spacing:.04em}
+.headerActions{display:flex;align-items:center;gap:8px}
+.headerDate{display:none;color:var(--muted);font-size:11px;font-weight:650}
+.iconbtn{width:42px;height:42px;border-radius:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink-2);font-size:18px;box-shadow:0 3px 8px #26344a08}
+.page{display:none}.page.active{display:block;animation:rise .22s ease both}
+@keyframes rise{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.pageIntro{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin:10px 0 22px}
+.kicker{font-size:10px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin:0 0 7px}
+.pageIntro h2{font-size:clamp(24px,4vw,32px);line-height:1.12;letter-spacing:-1.1px;margin:0;font-weight:850}
+.pageIntro p{margin:7px 0 0;color:var(--muted);font-size:13px}
+.dateChip{flex-shrink:0;padding:8px 11px;border:1px solid var(--line);border-radius:99px;background:var(--paper);font-size:11px;font-weight:750;color:var(--ink-2)}
+.hero{position:relative;overflow:hidden;background:var(--ink);color:#fff;border-radius:24px;padding:22px;margin:0 0 17px;box-shadow:var(--shadow-lg)}
+.hero:before{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-90px;top:-125px;border:1px solid #ffffff20;box-shadow:0 0 0 25px #ffffff08,0 0 0 52px #ffffff06}
+.hero:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:#d46f5920;right:37px;bottom:-62px}
+.heroTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative;z-index:1}
+.hero .eyebrow{font-size:10px;letter-spacing:.16em;color:#c4d1e5;font-weight:800}
+.hero h2{font-size:clamp(22px,4vw,29px);line-height:1.12;letter-spacing:-.9px;margin:8px 0 7px;font-weight:850;max-width:500px}
+.hero p{font-size:12px;color:#c0ccdc;margin:0}
+.pill{border:1px solid #ffffff37;border-radius:99px;padding:6px 10px;font-size:10px;font-weight:750;color:#e4ebf4;background:#ffffff0b;white-space:nowrap}
+.heroProgress{position:relative;z-index:1;margin-top:20px}
+.progressTrack{height:8px;background:#ffffff25;border-radius:99px;overflow:hidden}
+.progressFill{height:100%;width:0;background:#82c8a9;border-radius:99px}
+.progressMeta{display:flex;justify-content:space-between;gap:12px;color:#c4cfdd;font-size:10px;font-weight:650;margin-top:8px}
+.stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:19px}
+.stat{padding:10px 11px;border-radius:14px;background:#ffffff0e;border:1px solid #ffffff15}
+.stat strong{display:block;color:white;font-size:20px;line-height:1.2;font-weight:850;letter-spacing:-.7px}
+.stat span{display:block;color:#c1ccda;font-size:10px;margin-top:4px}
+.dashboardGrid{display:grid;gap:18px}
+.sectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:25px 2px 11px}
+.sectionHead h3{margin:0;font-size:16px;letter-spacing:-.35px;font-weight:850}
+.sectionHead .subtle{font-size:11px}
+.subtle{color:var(--muted);font-size:12px}
+.subjectList{display:grid;gap:10px}
+.subject{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:14px 15px;box-shadow:0 3px 12px rgba(35,44,58,.035)}
+.subject:before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:0 4px 4px 0;background:var(--blue)}
+.subject:nth-child(2):before{background:var(--green)}.subject:nth-child(3):before{background:var(--coral)}.subject:nth-child(4):before{background:var(--gold)}
+.subjectHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.subjectName{font-size:14px;line-height:1.3;font-weight:800;color:var(--ink);overflow-wrap:anywhere}
+.subjectMeta{font-size:11px;color:var(--muted);margin-top:4px}
+.percent{flex-shrink:0;color:var(--green);font-size:12px;font-weight:850}
+.bar{height:6px;background:#eeede7;border-radius:99px;overflow:hidden;margin:12px 0 9px}
+.bar>i{display:block;height:100%;width:0;background:var(--blue);border-radius:99px}
+.subject:nth-child(2) .bar>i{background:var(--green)}.subject:nth-child(3) .bar>i{background:var(--coral)}.subject:nth-child(4) .bar>i{background:var(--gold)}
+.subjectFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:28px}
+.subjectFoot .subtle{font-size:10px}
+.subjectFoot input{width:68px;background:#faf9f5;border:1px solid var(--line);border-radius:8px;padding:6px;color:var(--ink);font-size:11px;margin-left:4px}
+.smallbtn,.primary,.secondary,.danger{border:0;border-radius:11px;padding:10px 13px;font-size:11px;font-weight:800;transition:transform .15s,filter .15s}
+.smallbtn:active,.primary:active,.secondary:active,.danger:active{transform:scale(.98)}
+.smallbtn{background:var(--blue-soft);color:var(--blue)}
+.primary{background:var(--blue);color:#fff;box-shadow:0 5px 12px #3157a51e}
+.primary:hover{background:var(--blue-strong)}
+.secondary{background:#f4f2ec;color:var(--ink-2);border:1px solid var(--line)}
+.danger{background:var(--red-soft);color:var(--red);border:1px solid #f0d6d3}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}.toolbar button{flex:1;min-width:118px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 3px 12px rgba(35,44,58,.03)}
+.panel h3{margin:0 0 8px;font-size:14px;font-weight:850;letter-spacing:-.2px}
+.panel p{margin:0;color:var(--muted);font-size:12px}
+.nextCard{position:relative;overflow:hidden;background:var(--green-soft);border:1px solid #d8e9df;border-radius:18px;padding:16px}
+.nextCard:after{content:"→";position:absolute;right:15px;top:12px;font-size:26px;color:#83aa98;font-weight:400}
+.nextCard .eyebrow{font-size:9px;letter-spacing:.14em;color:var(--green);font-weight:850}
+.nextCard strong{display:block;margin:8px 26px 5px 0;color:#245f4c;font-size:16px;line-height:1.25}
+.nextCard p{color:#5d7d70;font-size:11px;margin:0}
+.rulePanel{background:var(--paper)}
+.rulePanel .ruleMark{display:inline-grid;place-items:center;width:25px;height:25px;margin-right:8px;background:var(--gold-soft);color:var(--gold);border-radius:8px;font-size:12px}
+.bottomNav{position:fixed;z-index:10;bottom:0;left:0;right:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:4px;background:rgba(255,254,250,.95);border-top:1px solid var(--line);box-shadow:0 -7px 22px rgba(36,45,58,.06);backdrop-filter:blur(16px)}
+.navbtn{flex:1;max-width:150px;min-width:0;background:transparent;border:0;color:#818b97;padding:7px 2px;border-radius:13px;font-size:9px;font-weight:750;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.navbtn b{width:25px;height:22px;display:grid;place-items:center;font-size:19px;font-weight:400;line-height:1}
+.navbtn.active{background:#edf1fa;color:var(--blue)}
+.navbtn.active b{color:var(--blue)}
+.fieldGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field{display:grid;gap:6px}.field label{font-size:11px;color:var(--ink-2);font-weight:800}
+.field input,.field select{width:100%;background:#fbfaf7;border:1px solid #dfddd5;color:var(--ink);border-radius:11px;padding:11px 12px;min-width:0}
+.field.full{grid-column:1/-1}.hint{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.45}
+.tree{display:grid;gap:8px}
+.treeNode{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 12px;box-shadow:0 2px 9px #26344a07}
+.treeLine{display:flex;align-items:center;gap:8px;min-width:0}
+.treeLine>span:first-child{color:var(--blue);font-size:15px}
+.treeName{flex:1;min-width:0;font-size:12px;font-weight:750;color:var(--ink-2);overflow-wrap:anywhere}
+.treeCount{font-size:11px;color:var(--blue);font-weight:850;white-space:nowrap}
+.treeActions{display:flex;gap:5px}
+.mini{border:1px solid #e6e4dd;background:#f8f7f2;color:#5c6878;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:750}
+.mini.del{color:var(--red);background:var(--red-soft);border-color:#f0d6d3}
+.children{margin:9px 0 0 10px;padding-left:11px;border-left:1px solid #dce1e7;display:grid;gap:7px}
+.tag{font-size:9px;padding:4px 8px;border-radius:99px;background:#edf1fa;color:var(--blue);font-weight:800}
+.queueItem{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #efede7}
+.queueItem:last-child{border:0}
+.rank{width:27px;height:27px;flex-shrink:0;display:grid;place-items:center;background:var(--blue-soft);border-radius:9px;color:var(--blue);font-weight:850;font-size:11px}
+.queueItem strong{font-size:12px;font-weight:800;color:var(--ink-2)}
+.queueItem small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.calendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.day{background:#fff;border:1px solid var(--line);border-radius:11px;min-height:66px;padding:7px 3px;text-align:center}
+.day .d{font-size:9px;color:var(--muted);font-weight:700}
+.day strong{display:block;font-size:13px;margin:5px 0;color:var(--ink)}
+.day em{font-style:normal;font-size:8px;color:var(--green);font-weight:750}
+.day.off{background:#f0eee8;opacity:.62}
+.empty{padding:24px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed #d8d5cb;border-radius:16px;font-size:12px}
+.modalBack{position:fixed;inset:0;background:rgba(25,35,49,.48);z-index:30;display:none;align-items:flex-end;justify-content:center;padding:12px;backdrop-filter:blur(4px)}
+.modalBack.show{display:flex}
+.modal{width:min(100%,520px);background:#fffefa;border:1px solid #e7e3da;color:var(--ink);border-radius:22px;padding:20px;box-shadow:var(--shadow-lg);max-height:88vh;overflow:auto}
+.modal h3{margin:0 0 8px;font-size:18px;font-weight:850}.modal p{color:var(--muted);font-size:12px;line-height:1.55}
+.modalActions{display:flex;gap:8px;margin-top:16px}.modalActions button{flex:1}
+.warning{background:#fff4e9;border:1px solid #f0ddc5;padding:11px;border-radius:12px;color:#865923;font-size:11px;line-height:1.5}
+.toast{position:fixed;z-index:50;left:50%;bottom:91px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:99px;font-size:11px;font-weight:800;box-shadow:var(--shadow-lg);display:none;max-width:90%;text-align:center}
+#dayChecks label{background:#f5f3ed;border:1px solid var(--line);border-radius:10px;padding:7px 9px}
+@media(min-width:760px){
+ .shell{display:block;max-width:100%;margin:0 auto}
+ .sidebar{display:none}
+ .sideBrand{display:none}
+ .sideBrand .logo{display:none}
+ .sideBrand strong{display:none}
+ .sideBrand small{display:none}
+ .sideLabel{display:none}
+ .sideNav{display:none}
+ .sideNav .navbtn{display:none}
+ .sideNav .navbtn b{display:none}
+ .sideNav .navbtn.active{display:none}
+ .sideFoot{display:none}
+ .sideFoot strong,.sideFoot span{display:none}
+ .app{max-width:none;padding:0 28px 50px}
+ header.topbar{height:76px;border-bottom:1px solid #e8e4da;margin-bottom:18px}
+ .mobileBrand{display:flex}.headerDate{display:none}
+ .bottomNav{display:flex}
+ .dashboardGrid{grid-template-columns:minmax(0,1.55fr) minmax(260px,.85fr);align-items:start;gap:22px}
+ .dashboardAside{position:sticky;top:22px}
+ .subjectList{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .hero{padding:25px 27px}
+ .modalBack{align-items:center}
+}
+@media(min-width:1080px){
+ .shell{grid-template-columns:246px minmax(0,1fr)}
+ .app{padding-left:28px;padding-right:28px}
+ .dashboardGrid{grid-template-columns:minmax(0,1.7fr) minmax(290px,.8fr);gap:28px}
+ .subjectList{gap:12px}
+}
+@media(max-width:420px){
+ .app{padding-left:13px;padding-right:13px}
+ header.topbar{height:67px}
+ .brand h1{font-size:17px}
+ .pageIntro{margin:7px 0 17px}
+ .pageIntro h2{font-size:25px}
+ .dateChip{font-size:9px;padding:7px 8px}
+ .hero{padding:19px;border-radius:21px}
+ .hero h2{font-size:23px}
+ .stats{gap:6px}
+ .stat{padding:9px 8px}
+ .stat strong{font-size:18px}
+ .stat span{font-size:9px}
+ .fieldGrid{grid-template-columns:1fr}
+ .calendarGrid{gap:3px}
+ .day{min-height:60px}
+}
+
+/* Calendário mensal e área segura da navegação inferior */
+.app{padding-bottom:calc(142px + env(safe-area-inset-bottom));}
+.bottomNav{min-height:76px;padding-bottom:calc(10px + env(safe-area-inset-bottom));}
+main{padding-bottom:12px;}
+.page{padding-bottom:18px;}
+.calendarToolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.calendarToolbar h3{margin:0;text-align:center;text-transform:capitalize;font-size:15px;flex:1}
+.monthNav{width:36px;height:36px;border-radius:11px;font-size:25px;line-height:1;padding:0}
+.calendarLegend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 13px;color:var(--muted);font-size:10px;font-weight:700}
+.calendarLegend span{display:flex;align-items:center;gap:5px}
+.legendDot{display:inline-block;width:8px;height:8px;border-radius:50%}
+.studyDot{background:#c6d0df}.finishDot{background:var(--blue)}.startDot{background:var(--green)}
+.calendarWeekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-bottom:5px;text-align:center;color:var(--muted);font-size:9px;font-weight:800}
+.calendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.day{position:relative;min-height:72px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .12s,border-color .12s}
+.day:active{transform:scale(.97)}
+.day.emptyDay{background:transparent;border-color:transparent;pointer-events:none}
+.day.today{outline:2px solid #9aabc8;outline-offset:-2px}
+.day .eventTag{font-size:8px;line-height:1.1;font-weight:850;border-radius:5px;padding:3px 4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day.finishDay{background:#edf2fc;border-color:#c9d7f0}
+.day.finishDay .eventTag{background:var(--blue);color:#fff}
+.day.startDay{background:#eaf4ef;border-color:#c9e1d4}
+.day.startDay .eventTag{background:var(--green);color:#fff}
+.day.multiEvent{background:linear-gradient(135deg,#edf2fc 0 50%,#eaf4ef 50% 100%);border-color:#d7dce4}
+.day.multiEvent .eventTag{font-size:7px}
+.day .d{font-size:9px}
+.day strong{margin:0;font-size:13px}
+.day em{font-size:8px}
+.eventModalList{display:grid;gap:9px;margin-top:12px}
+.eventModalItem{padding:11px 12px;border-radius:12px;background:#f6f5f0;border:1px solid var(--line)}
+.eventModalItem strong{display:block;font-size:12px;color:var(--ink)}
+.eventModalItem p{margin:4px 0 0;font-size:11px}
+.eventType{display:inline-block;font-size:9px;font-weight:850;letter-spacing:.04em;border-radius:99px;padding:4px 8px;margin-bottom:6px}
+.eventType.finish{background:var(--blue-soft);color:var(--blue)}
+.eventType.start{background:var(--green-soft);color:var(--green)}
+@media(min-width:760px){.app{padding-bottom:48px}.bottomNav{display:none}}
+/* A navegação inferior permanece também em tablets e telas largas. */
+.sidebar{display:none!important}
+.shell{display:block!important}
+@media(min-width:760px){.app{padding-bottom:calc(142px + env(safe-area-inset-bottom));}.bottomNav{display:flex!important}}
+@media(max-width:420px){.app{padding-bottom:calc(150px + env(safe-area-inset-bottom))}.day{min-height:65px}.calendarGrid{gap:3px}}
+
+
+.dependencyList{display:grid;gap:7px;max-height:34vh;overflow:auto;padding:2px}
+.dependencyOption{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#f8f7f2;color:var(--ink-2);font-size:11px}
+.dependencyOption input{flex:0 0 auto;margin-top:2px}
+.day.hasActual{box-shadow:inset 0 0 0 1px #26765f}
+.eventType.actual{background:var(--green-soft);color:var(--green)}
+.mini:disabled{opacity:.35;cursor:not-allowed}
+#daysWeek:disabled{opacity:1;color:var(--muted);background:#f2f0ea}
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+ <div class="app">
+  <header class="topbar">
+   <div class="brand mobileBrand">
+    <div class="logo">MC</div>
+    <div><h1>Meu Ciclo</h1><p>PLANEJAMENTO DE ESTUDOS</p></div>
+   </div>
+   <div class="headerDate" id="headerDate">PLANEJAMENTO 2027</div>
+   <div class="headerActions">
+    <button class="iconbtn" id="backupBtn" title="Exportar backup" aria-label="Exportar backup">↥</button>
+   </div>
+  </header>
+
+  <main>
+   <section class="page active" id="page-home">
+    <div class="pageIntro">
+     <div><p class="kicker">Seu espaço de preparação</p><h2>Vamos avançar<br>um dia de cada vez.</h2><p id="todayLine">Um plano consistente para chegar bem aos editais.</p></div>
+     <span class="dateChip" id="homeDate">2027 · FOCO</span>
+    </div>
+    <div class="hero">
+     <div class="heroTop">
+      <div><div class="eyebrow">Visão do planejamento</div><h2>O importante é continuar.</h2><p>Veja o que está em andamento, o que vem depois e quando cada etapa deve terminar.</p></div>
+      <span class="pill" id="activePill">4 vagas ativas</span>
+     </div>
+     <div class="heroProgress">
+      <div class="progressTrack"><div class="progressFill" id="overallBar" style="width:0%"></div></div>
+      <div class="progressMeta"><span id="overallText">0% do plano concluído</span><span id="remainingText">— cards restantes</span></div>
+     </div>
+     <div class="stats">
+      <div class="stat"><strong id="statActive">4</strong><span>Matérias ativas</span></div>
+      <div class="stat"><strong id="statWeek">96</strong><span>Cards por semana</span></div>
+      <div class="stat"><strong id="statFinish">—</strong><span>Próximo término</span></div>
+     </div>
+    </div>
+
+    <div class="dashboardGrid">
+     <div class="dashboardMain">
+      <div class="sectionHead"><h3>Em andamento</h3><span class="subtle" id="slotSummary">4 vagas</span></div>
+      <div class="subjectList" id="activeSubjects"></div>
+     </div>
+     <aside class="dashboardAside">
+      <div class="sectionHead"><h3>Na sequência</h3></div>
+      <div class="nextCard" id="nextSubject"><div class="eyebrow">PRÓXIMA MATÉRIA</div><strong>Carregando...</strong><p>Fila estratégica de estudos</p></div>
+      <div class="sectionHead"><h3>Seu ritmo</h3></div>
+      <div class="panel rulePanel">
+       <div style="display:flex;align-items:center;margin-bottom:8px"><span class="ruleMark">✦</span><strong style="font-size:12px">Plano configurado</strong></div>
+       <div class="subtle" id="ruleSummary">—</div>
+       <div class="hint">As datas são estimativas e se ajustam quando você conclui matérias, altera totais ou muda as configurações.</div>
+      </div>
+      <div class="panel">
+       <h3>Uma rotina possível</h3>
+       <p>Não é necessário registrar cards diariamente. Atualize o total quando seu deck mudar e marque a matéria como concluída quando terminar.</p>
+      </div>
+     </aside>
+    </div>
+   </section>
+
+   <section class="page" id="page-cycle">
+    <div class="pageIntro"><div><p class="kicker">Acompanhamento</p><h2>Meu ciclo</h2><p>Conclua matérias, registre o início real e libere as próximas etapas.</p></div><span class="dateChip">EM CURSO</span></div>
+    <div class="panel"><h3>Como atualizar</h3><p>Quando terminar uma matéria, toque em “Concluir matéria”. O aplicativo confirma a decisão e coloca a próxima disciplina na vaga liberada.</p></div>
+    <div class="sectionHead"><h3>Matérias ativas</h3><span class="subtle">Etapa e previsão</span></div>
+    <div class="subjectList" id="cycleSubjects"></div>
+    <div class="sectionHead"><h3>Fila de prioridades</h3><span class="subtle">Próximas disciplinas</span></div>
+    <div class="panel" id="queueList"></div>
+    <div class="sectionHead"><h3>Histórico do ciclo</h3><span class="subtle">Concluídas e suspensas</span></div>
+    <div class="subjectList" id="archiveSubjects"></div>
+   </section>
+
+   <section class="page" id="page-calendar">
+    <div class="pageIntro"><div><p class="kicker">Previsões</p><h2>Calendário</h2><p>Veja os dias de estudo e as próximas conclusões.</p></div><span class="dateChip" id="calendarMonthChip">—</span></div>
+    <div class="panel"><div class="calendarToolbar"><button class="iconbtn monthNav" id="prevMonth" aria-label="Mês anterior">‹</button><h3 id="calendarMonth">—</h3><button class="iconbtn monthNav" id="nextMonth" aria-label="Próximo mês">›</button></div><p style="margin-bottom:13px">Toque em um dia marcado para ver o que acontece no seu ciclo.</p><div class="calendarLegend"><span><i class="legendDot studyDot"></i>Estudo</span><span><i class="legendDot finishDot"></i>Término</span><span><i class="legendDot startDot"></i>Início</span></div><div class="calendarWeekdays"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div><div class="calendarGrid" id="calendarGrid"></div></div>
+    <div class="sectionHead"><h3>Datas estimadas</h3><span class="subtle">Matérias em andamento</span></div>
+    <div class="panel" id="dateList"></div>
+   </section>
+
+   <section class="page" id="page-decks">
+    <div class="pageIntro"><div><p class="kicker">Organização do conteúdo</p><h2>Biblioteca</h2><p>Gerencie decks, subdecks e matérias do planejamento.</p></div><span class="dateChip">HIERARQUIA</span></div>
+    <div class="panel"><h3>Seus decks</h3><p>A estrutura espelha seus decks do Anki. Toque em opções para editar a quantidade de cards, suspender ou excluir. Isso não altera os cartões originais.</p><div class="toolbar"><button class="secondary" id="addDeckBtn">＋ Novo deck</button><button class="secondary" id="restoreDefaultsBtn">Restaurar estrutura</button></div></div>
+    <div class="tree" id="deckTree"></div>
+   </section>
+
+   <section class="page" id="page-settings">
+    <div class="pageIntro"><div><p class="kicker">Personalização</p><h2>Configurações</h2><p>Adapte o plano ao tempo que você tem disponível.</p></div><span class="dateChip">AJUSTES</span></div>
+    <div class="panel">
+     <h3>Seu ritmo de estudo</h3>
+     <div class="fieldGrid">
+      <div class="field"><label for="slots">Matérias simultâneas</label><input id="slots" type="number" min="1" max="12"></div>
+      <div class="field"><label for="cardsDay">Cards por matéria/dia</label><input id="cardsDay" type="number" min="1" max="100"></div>
+      <div class="field"><label for="daysWeek">Dias ativos por semana (calculado)</label><select id="daysWeek"><option value="1">1 dia</option><option value="2">2 dias</option><option value="3">3 dias</option><option value="4">4 dias</option><option value="5">5 dias</option><option value="6">6 dias</option><option value="7">7 dias</option></select></div>
+      <div class="field"><label for="startDate">Primeiro dia de estudo dos cards novos</label><input id="startDate" type="date"><div class="hint">É o primeiro dia previsto para estudar cards novos. As previsões futuras partem desta data; os registros reais não são alterados.</div></div>
+      <div class="field full"><label for="studyDays">Dias da semana</label><select id="studyDays"><option value="mon-sat">Segunda a sábado (domingo livre)</option><option value="mon-fri">Segunda a sexta</option><option value="all">Todos os dias</option><option value="custom">Personalizar abaixo</option></select></div>
+      <div class="field full" id="customDaysWrap" style="display:none"><label>Dias ativos</label><div id="dayChecks" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+     </div>
+     <div class="toolbar"><button class="primary" id="saveSettings">Salvar e recalcular</button></div>
+     <div class="hint">O aplicativo usa o total de cards novos para estimar as datas. Você só precisa atualizar esse total quando seu deck mudar.</div>
+    </div>
+    <div class="panel"><h3>Regras do ciclo</h3><p>Português completo entra após Português + Crase do BB. Matemática entra após Administração IBFC. Direito Administrativo entra após Informática BB. Administração Geral e Pública entra após Conhecimentos Bancários BB. As demais seguem a fila estratégica.</p></div>
+    <div class="panel"><h3>Backup e segurança</h3><p>Exporte seus dados regularmente para guardar uma cópia do progresso e das configurações.</p><div class="toolbar"><button class="secondary" id="exportBtn">Exportar backup</button><button class="secondary" id="importBtn">Importar backup</button></div><button class="danger" id="resetBtn" style="width:100%;margin-top:8px">Apagar dados do aplicativo</button><div class="hint">Os dados são armazenados localmente neste navegador.</div></div>
+   </section>
+  </main>
+ </div>
+</div>
+
+<nav class="bottomNav">
+ <button class="navbtn active" data-page="home"><b>⌂</b>Início</button>
+ <button class="navbtn" data-page="cycle"><b>◫</b>Ciclo</button>
+ <button class="navbtn" data-page="calendar"><b>▦</b>Calendário</button>
+ <button class="navbtn" data-page="decks"><b>▤</b>Biblioteca</button>
+ <button class="navbtn" data-page="settings"><b>⚙</b>Ajustes</button>
+</nav>
+<div class="modalBack" id="modalBack"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept="application/json" hidden>
+
+<script>
+const DEFAULT_DATA={
+ strategyVersion:2,
+ settings:{slots:4,cardsDay:4,daysWeek:6,startDate:'2026-11-02',studyDays:'mon-sat',customDays:[1,2,3,4,5,6]},
+ decks:[
+  {id:'estat',name:'Concursos Estatutários',cards:2065,children:[
+   {id:'adm',name:'Administração',cards:523,children:[
+    {id:'adm-materiais',name:'Administração de Recursos Materiais e Logística',cards:95},
+    {id:'adm-geral',name:'Administração Geral e Pública',cards:184},
+    {id:'adm-qualidade',name:'Gestão da Qualidade',cards:36},
+    {id:'adm-pessoas',name:'Gestão de Pessoas',cards:203},
+    {id:'adm-projetos',name:'Gestão de Projetos',cards:5}]},
+   {id:'arquivologia',name:'Arquivologia',cards:123},
+   {id:'com-atend',name:'Comunicação e Atendimento',cards:15},
+   {id:'com-linguagem',name:'Comunicação e Linguagem',cards:149,children:[
+    {id:'ling-port',name:'Língua Portuguesa',cards:43},{id:'redacao',name:'Redação Oficial',cards:106}]},
+   {id:'contabilidade',name:'Contabilidade',cards:2},
+   {id:'direito',name:'Direito',cards:1062,children:[
+    {id:'dir-adm',name:'Direito Administrativo',cards:534},
+    {id:'dir-civil',name:'Direito Civil',cards:40},
+    {id:'dir-const',name:'Direito Constitucional',cards:121},
+    {id:'dir-trabalho',name:'Direito do Trabalho',cards:1},
+    {id:'dir-penal',name:'Direito Penal',cards:54},
+    {id:'proc-civil',name:'Direito Processual Civil',cards:202},
+    {id:'proc-penal',name:'Direito Processual Penal',cards:101},
+    {id:'lgpd',name:'Proteção de Dados Pessoais e LGPD',cards:9}]},
+   {id:'financas',name:'Finanças Públicas',cards:26},
+   {id:'info-tec',name:'Informática e Tecnologia',cards:8},
+   {id:'leg-if',name:'Legislação Educacional e dos Institutos Federais',cards:43,children:[
+    {id:'ldb-etp',name:'LDB — Educação Profissional e Tecnológica',cards:4},
+    {id:'lei-if',name:'Lei 11.892/2008 — Institutos Federais',cards:9},
+    {id:'pcctae',name:'PCCTAE — Lei 11.091/2005',cards:30}]},
+   {id:'raciocinio',name:'Raciocínio e Matemática',cards:69},
+   {id:'seg-trabalho',name:'Segurança do Trabalho',cards:2},
+   {id:'etica',name:'Ética, Integridade e Sustentabilidade',cards:43}]},
+  {id:'banc',name:'Concursos Bancários',cards:12276,children:[
+   {id:'bb2026',name:'BB 2026',cards:879,children:[
+    {id:'bb-cb',name:'Conhecimentos Bancários',cards:362,learning:0,reviews:46},
+    {id:'bb-crase',name:'Crase',cards:0,learning:0,reviews:27},
+    {id:'bb-info',name:'Informática',cards:220,learning:9,reviews:216},
+    {id:'bb-port',name:'Português Geral',cards:69,learning:0,reviews:71},
+    {id:'bb-vendas',name:'Vendas e Negociação',cards:228,learning:0,reviews:1}]},
+   {id:'cb-completo',name:'Conhecimentos Bancários completo',cards:369},
+   {id:'info-completa',name:'Informática completa',cards:521},
+   {id:'matematica',name:'Matemática',cards:385},
+   {id:'mat-fin',name:'Matemática Financeira',cards:299},
+   {id:'port-completo',name:'Português para Concursos',cards:341},
+   {id:'ingles-completo',name:'Inglês Completo',cards:9482}]}
+ ],
+ subjects:[
+  // Matérias atualmente ativas no BB 2026: as quatro vagas e o progresso existente são preservados.
+  {id:'bb-port-s',name:'Português + Crase — BB 2026',cards:69,deckIds:['bb-port','bb-crase'],status:'active',progress:0,trigger:null,next:'port-s'},
+  {id:'bb-info-s',name:'Informática — BB 2026',cards:220,deckIds:['bb-info'],status:'active',progress:0,trigger:null,next:'port-s'},
+  {id:'bb-cb-s',name:'Conhecimentos Bancários — BB 2026',cards:362,deckIds:['bb-cb'],status:'active',progress:0,trigger:null,next:'port-s'},
+  // Primeiras duas vagas liberadas: Português para Concursos e Matemática, nesta ordem.
+  {id:'port-s',name:'Português para Concursos',cards:341,deckIds:['port-completo'],status:'queue',progress:0,next:'mat-s'},
+  {id:'mat-s',name:'Matemática',cards:385,deckIds:['matematica'],status:'queue',progress:0,next:'dir-adm-s'},
+  // Núcleo transversal para concursos administrativos e institucionais.
+  {id:'dir-adm-s',name:'Direito Administrativo',cards:534,deckIds:['dir-adm'],status:'queue',progress:0,next:'adm-geral-s'},
+  {id:'adm-geral-s',name:'Administração Geral e Pública',cards:184,deckIds:['adm-geral'],status:'queue',progress:0,next:'dir-const-s'},
+  {id:'dir-const-s',name:'Direito Constitucional',cards:121,deckIds:['dir-const'],status:'queue',progress:0,next:'materiais-s'},
+  {id:'materiais-s',name:'Administração de Recursos Materiais e Logística',cards:95,deckIds:['adm-materiais'],status:'queue',progress:0,next:'gest-pessoas-s'},
+  {id:'gest-pessoas-s',name:'Gestão de Pessoas',cards:203,deckIds:['adm-pessoas'],status:'queue',progress:0,next:'arquivologia-s'},
+  {id:'arquivologia-s',name:'Arquivologia',cards:123,deckIds:['arquivologia'],status:'queue',progress:0,next:'redacao-s'},
+  {id:'redacao-s',name:'Redação Oficial — Concursos Estatutários',cards:106,deckIds:['redacao'],status:'queue',progress:0,next:'etica-s'},
+  {id:'etica-s',name:'Ética, Integridade e Sustentabilidade',cards:43,deckIds:['etica'],status:'queue',progress:0,next:'lgpd-s'},
+  {id:'lgpd-s',name:'Proteção de Dados Pessoais e LGPD',cards:9,deckIds:['lgpd'],status:'queue',progress:0,next:'info-completa-s'},
+  // Curso transversal extenso: fica depois do núcleo principal, não entre as primeiras entradas.
+  {id:'info-completa-s',name:'Informática completa',cards:521,deckIds:['info-completa'],status:'queue',progress:0,next:'financas-s'},
+  {id:'financas-s',name:'Finanças Públicas',cards:26,deckIds:['financas'],status:'queue',progress:0,next:'atendimento-s'},
+  {id:'atendimento-s',name:'Comunicação e Atendimento',cards:15,deckIds:['com-atend'],status:'queue',progress:0,next:'qualidade-s'},
+  {id:'qualidade-s',name:'Gestão da Qualidade',cards:36,deckIds:['adm-qualidade'],status:'queue',progress:0,next:'dir-civil-s'},
+  // Bloco jurídico de tribunal estadual: ganha peso se houver edital de técnico de nível médio.
+  {id:'dir-civil-s',name:'Direito Civil',cards:40,deckIds:['dir-civil'],status:'queue',progress:0,next:'proc-civil-s'},
+  {id:'proc-civil-s',name:'Direito Processual Civil',cards:202,deckIds:['proc-civil'],status:'queue',progress:0,next:'dir-penal-s'},
+  {id:'dir-penal-s',name:'Direito Penal',cards:54,deckIds:['dir-penal'],status:'queue',progress:0,next:'proc-penal-s'},
+  {id:'proc-penal-s',name:'Direito Processual Penal',cards:101,deckIds:['proc-penal'],status:'queue',progress:0,next:'ling-port-s'},
+  {id:'ling-port-s',name:'Língua Portuguesa — Comunicação e Linguagem',cards:43,deckIds:['ling-port'],status:'queue',progress:0,next:'info-tec-s'},
+  // Decks pequenos ou muito específicos: permanecem na fila, mas sem prioridade inicial.
+  {id:'info-tec-s',name:'Informática e Tecnologia — Estatutários',cards:8,deckIds:['info-tec'],status:'queue',progress:0,next:'contabilidade-s'},
+  {id:'contabilidade-s',name:'Contabilidade',cards:2,deckIds:['contabilidade'],status:'queue',progress:0,next:'dir-trabalho-s'},
+  {id:'dir-trabalho-s',name:'Direito do Trabalho',cards:1,deckIds:['dir-trabalho'],status:'queue',progress:0,next:'seg-trabalho-s'},
+  {id:'seg-trabalho-s',name:'Segurança do Trabalho',cards:2,deckIds:['seg-trabalho'],status:'queue',progress:0,next:'projetos-s'},
+  {id:'projetos-s',name:'Gestão de Projetos',cards:5,deckIds:['adm-projetos'],status:'queue',progress:0,next:'raciocinio-s'},
+  {id:'raciocinio-s',name:'Raciocínio e Matemática — Estatutários',cards:69,deckIds:['raciocinio'],status:'queue',progress:0,next:'leg-if-s'},
+  {id:'leg-if-s',name:'Legislação Educacional e dos Institutos Federais',cards:43,deckIds:['leg-if'],status:'queue',progress:0,next:null}
+ ]
+};
+const STORAGE_KEY='meu_ciclo_concursos_v1';
+const SCHEMA_VERSION=3;
+const STRATEGY_VERSION=2;
+const DAY_MS=86400000;
+const MAX_CARDS=10000000;
+let storageWarning=false;
+let storageRecoveryRaw=null;
+let lastPersisted=null;
+let calendarCursor=null;
+
+function clone(value){return JSON.parse(JSON.stringify(value));}
+function intValue(value,fallback=0){const n=Number(value);return Number.isSafeInteger(n)&&n>=0?n:fallback;}
+function dateString(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+function parseDate(value){
+ if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return null;
+ const [y,m,d]=value.split('-').map(Number),out=new Date(y,m-1,d,12,0,0,0);
+ return out.getFullYear()===y&&out.getMonth()===m-1&&out.getDate()===d?out:null;
+}
+function validDate(value){return value==null||value===''||!!parseDate(value);}
+function todayLocal(){const d=new Date();d.setHours(12,0,0,0);return d;}
+function maxDate(...dates){return dates.filter(Boolean).reduce((a,b)=>a>b?a:b,null);}
+function minDate(...dates){return dates.filter(Boolean).reduce((a,b)=>a<b?a:b,null);}
+function fmtDate(d){return d?d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';}
+function studyDayCount(settings){if(settings.studyDays==='all')return 7;if(settings.studyDays==='mon-fri')return 5;if(settings.studyDays==='mon-sat')return 6;return (settings.customDays||[]).length;}
+function walk(nodes,fn){(nodes||[]).forEach(n=>{fn(n);if(n.children?.length)walk(n.children,fn);});}
+function collectIds(node){const ids=[node.id];(node.children||[]).forEach(c=>ids.push(...collectIds(c)));return ids;}
+function findNode(id,nodes=data.decks){for(const n of nodes){if(n.id===id)return n;const found=n.children?.length?findNode(id,n.children):null;if(found)return found;}return null;}
+function findParent(nodes,id,parent=null){for(const n of nodes){if(n.id===id)return parent;if(n.children?.length){const p=findParent(n.children,id,n);if(p!==undefined&&p!==null)return p;}}return null;}
+function leafNodes(node){if(!node)return[];if(!node.children?.length)return[node];return node.children.flatMap(leafNodes);}
+function leavesForDeckIds(ids){const out=new Map();(ids||[]).forEach(id=>{const node=findNodeIn(data.decks,id);if(node)leafNodes(node).forEach(leaf=>out.set(leaf.id,leaf));});return [...out.values()];}
+function findNodeIn(nodes,id){for(const n of nodes){if(n.id===id)return n;const f=n.children?.length?findNodeIn(n.children,id):null;if(f)return f;}return null;}
+function sumLeaves(node){return leafNodes(node).reduce((sum,n)=>sum+n.cards,0);}
+function distributeInteger(total,items){
+ const target=Math.max(0,Math.trunc(total));if(!items.length)return[];
+ const weights=items.map(x=>Math.max(0,x.cards||0)),weightSum=weights.reduce((a,b)=>a+b,0);
+ if(!weightSum){return items.map((_,i)=>i===0?target:0);}
+ const exact=weights.map(w=>target*w/weightSum),base=exact.map(Math.floor);
+ let remainder=target-base.reduce((a,b)=>a+b,0);
+ const order=exact.map((v,i)=>({i,f:v-base[i],w:weights[i]})).sort((a,b)=>b.f-a.f||b.w-a.w||a.i-b.i);
+ for(let i=0;i<remainder;i++)base[order[i%order.length].i]++;
+ return base;
+}
+function setSubtreeTotal(node,target){
+ const value=Math.max(0,Math.trunc(target));
+ if(!node.children?.length){node.cards=value;return;}
+ const allocation=distributeInteger(value,node.children);
+ node.children.forEach((child,i)=>setSubtreeTotal(child,allocation[i]));
+ node.cards=node.children.reduce((s,c)=>s+c.cards,0);
+}
+function recomputeDeckTotals(nodes=data.decks){nodes.forEach(n=>{if(n.children?.length){recomputeDeckTotals(n.children);n.cards=n.children.reduce((sum,c)=>sum+c.cards,0);}});}
+function localizeLegacyDeckTotals(decks,subjects){
+ const oldLeaves=new Map();walk(decks,n=>{if(!n.children?.length)oldLeaves.set(n.id,n.cards);});
+ function rebalance(node){
+  if(node.children?.length){const childrenSum=node.children.reduce((s,c)=>s+c.cards,0);if(childrenSum!==node.cards)setSubtreeTotal(node,node.cards);node.cards=node.children.reduce((s,c)=>s+c.cards,0);node.children.forEach(rebalance);node.cards=node.children.reduce((s,c)=>s+c.cards,0);}
+ }
+ decks.forEach(rebalance);
+ const deltas=new Map();walk(decks,n=>{if(!n.children?.length)deltas.set(n.id,n.cards-(oldLeaves.get(n.id)||0));});
+ subjects.forEach(s=>{const leaves=collectLeavesForIds(decks,s.deckIds||[]);const delta=leaves.reduce((v,id)=>v+(deltas.get(id)||0),0);if(delta)s.cards=Math.max(0,s.cards+delta);});
+}
+function collectLeavesForIds(decks,ids){const idsOut=new Set();(ids||[]).forEach(id=>{const n=findNodeIn(decks,id);if(n)leafNodes(n).forEach(l=>idsOut.add(l.id));});return [...idsOut];}
+function assertAcyclic(subjects,field){
+ const byId=new Map(subjects.map(s=>[s.id,s]));const state=new Map();
+ function visit(id){const current=state.get(id)||0;if(current===1)throw new Error(field==='next'?'A sequência de matérias contém um ciclo.':'As dependências contêm um ciclo.');if(current===2)return;state.set(id,1);const s=byId.get(id);const refs=field==='next'?(s.next?[s.next]:[]):(s.prerequisites||[]);refs.forEach(ref=>{if(!byId.has(ref))throw new Error('Há uma referência para uma matéria inexistente.');visit(ref);});state.set(id,2);}
+ subjects.forEach(s=>visit(s.id));
+}
+function normalizeData(raw){
+ if(raw&&raw.data&&raw.app==='Meu Ciclo')raw=raw.data;
+ if(!raw||typeof raw!=='object'||!Array.isArray(raw.decks)||!Array.isArray(raw.subjects)||!raw.settings)throw new Error('Estrutura de backup incompleta.');
+ const out={schemaVersion:SCHEMA_VERSION,strategyVersion:intValue(raw.strategyVersion,0),settings:{...clone(DEFAULT_DATA.settings),...clone(raw.settings)},decks:clone(raw.decks),subjects:clone(raw.subjects),history:Array.isArray(raw.history)?clone(raw.history):[]};
+ const s=out.settings;
+ s.slots=Math.min(12,Math.max(1,intValue(s.slots,4)));
+ s.cardsDay=Math.min(100,Math.max(1,intValue(s.cardsDay,4)));
+ if(!['mon-sat','mon-fri','all','custom'].includes(s.studyDays))throw new Error('Configuração de dias de estudo inválida.');
+ s.customDays=[...new Set((Array.isArray(s.customDays)?s.customDays:[]).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=7))].sort((a,b)=>a-b);
+ if(s.studyDays==='custom'&&!s.customDays.length)throw new Error('Selecione pelo menos um dia de estudo.');
+ s.daysWeek=studyDayCount(s);
+ if(!parseDate(s.startDate))throw new Error('Data inicial inválida.');
+ const allIds=new Set();
+ function normalizeNode(node){
+  if(!node||typeof node!=='object')throw new Error('Deck inválido.');
+  if(typeof node.id!=='string'||!node.id.trim()||allIds.has(node.id))throw new Error('Há identificadores de deck duplicados ou inválidos.');
+  allIds.add(node.id);
+  if(typeof node.name!=='string'||!node.name.trim())throw new Error('Todo deck precisa ter um nome.');
+  node.name=node.name.trim();node.cards=intValue(node.cards,-1);if(node.cards<0||node.cards>MAX_CARDS)throw new Error(`Quantidade de cards inválida em ${node.name}; limite de ${MAX_CARDS.toLocaleString('pt-BR')}.`);
+  if(node.children!==undefined&&!Array.isArray(node.children))throw new Error('Hierarquia de decks inválida.');
+  if(Array.isArray(node.children)){node.children=node.children.map(normalizeNode);if(!node.children.length)delete node.children;}
+  return node;
+ }
+ out.decks=out.decks.map(normalizeNode);
+ if(!out.decks.length)throw new Error('O planejamento precisa ter ao menos um deck.');
+ localizeLegacyDeckTotals(out.decks,out.subjects);
+ const deckIds=new Set();walk(out.decks,n=>deckIds.add(n.id));
+ out.subjects.forEach(sub=>{
+  if(!sub||typeof sub!=='object'||typeof sub.id!=='string'||!sub.id.trim()||allIds.has(sub.id))throw new Error('Há identificadores de matéria duplicados ou inválidos.');
+  allIds.add(sub.id);
+  if(typeof sub.name!=='string'||!sub.name.trim())throw new Error('Toda matéria precisa ter um nome.');sub.name=sub.name.trim();
+  if(!['active','queue','suspended','done'].includes(sub.status))throw new Error(`Status inválido na matéria ${sub.name}.`);
+  sub.cards=intValue(sub.cards,-1);if(sub.cards<0||sub.cards>MAX_CARDS)throw new Error(`Quantidade de cards inválida em ${sub.name}; limite de ${MAX_CARDS.toLocaleString('pt-BR')}.`);
+  sub.progress=intValue(sub.progress,0);if(sub.progress>MAX_CARDS)throw new Error(`Progresso inválido em ${sub.name}.`);
+  if(!Array.isArray(sub.deckIds)||!sub.deckIds.length||new Set(sub.deckIds).size!==sub.deckIds.length||sub.deckIds.some(id=>!deckIds.has(id)))throw new Error(`A matéria ${sub.name} possui vínculo de deck inexistente ou inválido.`);
+  sub.next=sub.next||null;if(sub.next!==null&&typeof sub.next!=='string')throw new Error('Referência next inválida.');
+  sub.prerequisites=Array.isArray(sub.prerequisites)?[...new Set(sub.prerequisites)]:[];
+  if(sub.prerequisites.some(id=>typeof id!=='string'||id===sub.id))throw new Error(`Dependência inválida em ${sub.name}.`);
+  sub.notBefore=sub.notBefore||null;if(!validDate(sub.notBefore))throw new Error(`Data de liberação inválida em ${sub.name}.`);
+  ['startedAt','completedAt','activatedAt','earliestStartAt'].forEach(key=>{sub[key]=sub[key]||null;if(!validDate(sub[key]))throw new Error(`Data ${key} inválida em ${sub.name}.`);});
+  if(sub.status==='suspended'&&!['active','queue'].includes(sub.suspendedFromStatus))sub.suspendedFromStatus='queue';
+  if(!Number.isSafeInteger(Number(sub.activationOrder))||Number(sub.activationOrder)<0)sub.activationOrder=0;else sub.activationOrder=Number(sub.activationOrder);
+ });
+ const subjectIds=new Set(out.subjects.map(s=>s.id));
+ out.subjects.forEach(sub=>{
+  if(sub.next&&!subjectIds.has(sub.next))throw new Error(`A sequência de ${sub.name} aponta para uma matéria inexistente.`);
+  if(sub.prerequisites.some(id=>!subjectIds.has(id)))throw new Error(`Uma dependência de ${sub.name} aponta para uma matéria inexistente.`);
+ });
+ assertAcyclic(out.subjects,'next');assertAcyclic(out.subjects,'prerequisites');
+ const ownedLeaves=new Map();
+ out.subjects.forEach(sub=>collectLeavesForIds(out.decks,sub.deckIds).forEach(id=>{if(ownedLeaves.has(id))throw new Error(`O deck ${id} está vinculado a mais de uma matéria (${ownedLeaves.get(id)} e ${sub.name}).`);ownedLeaves.set(id,sub.name);}));
+ let activation=0;out.subjects.filter(s=>s.status==='active').forEach(sub=>{if(!sub.activationOrder)sub.activationOrder=++activation;else activation=Math.max(activation,sub.activationOrder);});
+ out.history=out.history.filter(x=>x&&typeof x==='object').slice(-500);
+ // A redução de vagas nunca deixa matérias ativas acima do limite.
+ const actives=out.subjects.filter(s=>s.status==='active').sort((a,b)=>a.activationOrder-b.activationOrder||out.subjects.indexOf(a)-out.subjects.indexOf(b));
+ actives.slice(s.slots).forEach(sub=>{sub.status='queue';sub.activationOrder=0;});
+ return out;
+}
+const STRATEGY_QUEUE_ORDER=[
+ 'port-s','mat-s','dir-adm-s','adm-geral-s','dir-const-s','materiais-s','gest-pessoas-s','arquivologia-s',
+ 'redacao-s','etica-s','lgpd-s','info-completa-s','financas-s','atendimento-s','qualidade-s',
+ 'dir-civil-s','proc-civil-s','dir-penal-s','proc-penal-s','ling-port-s','info-tec-s','contabilidade-s',
+ 'dir-trabalho-s','seg-trabalho-s','projetos-s','raciocinio-s','leg-if-s'
+];
+function applyStrategyMigration(state){
+ if((state.strategyVersion||0)>=STRATEGY_VERSION)return state;
+ // Atualiza a estrutura do BB 2026 conforme o deck de referência, preservando configurações e histórico.
+ function removeNode(nodes,id){for(let i=nodes.length-1;i>=0;i--){if(nodes[i].id===id){nodes.splice(i,1);return true;}if(nodes[i].children&&removeNode(nodes[i].children,id))return true;}return false;}
+ removeNode(state.decks,'bb-adm');
+ const bb=findNodeIn(state.decks,'bb2026');
+ if(bb){
+  const counts={'bb-cb':362,'bb-crase':0,'bb-info':220,'bb-port':69,'bb-vendas':228};
+  Object.entries(counts).forEach(([id,cards])=>{const n=findNodeIn(state.decks,id);if(n)n.cards=cards;});
+  bb.children=(bb.children||[]).filter(n=>n.id!=='bb-adm');
+ }
+ const banc=findNodeIn(state.decks,'banc');
+ if(banc&&!findNodeIn(state.decks,'ingles-completo'))banc.children.push(clone(DEFAULT_DATA.decks.find(d=>d.id==='banc').children.find(d=>d.id==='ingles-completo')));
+ state.subjects=state.subjects.filter(s=>s.id!=='bb-adm-s');
+ const subjectUpdates={'bb-port-s':69,'bb-info-s':220,'bb-cb-s':362};
+ state.subjects.forEach(sub=>{if(subjectUpdates[sub.id]!==undefined){sub.cards=subjectUpdates[sub.id];sub.progress=Math.min(sub.progress||0,sub.cards);}});
+ // Recalcula os totais dos grupos sem mexer nos demais decks.
+ function totalize(nodes){nodes.forEach(n=>{if(n.children?.length){totalize(n.children);n.cards=n.children.reduce((sum,c)=>sum+c.cards,0);}});}
+ totalize(state.decks);
+ const deletedIds=new Set((state.history||[]).filter(x=>x?.type==='deleted'&&x.subjectId).map(x=>x.subjectId));
+ const existing=new Set(state.subjects.map(x=>x.id));
+ DEFAULT_DATA.subjects.forEach(def=>{
+  if(!existing.has(def.id)&&!deletedIds.has(def.id))state.subjects.push(clone(def));
+ });
+ const byId=new Map(state.subjects.map(x=>[x.id,x]));
+ const preferredQueue=STRATEGY_QUEUE_ORDER.map(id=>byId.get(id)).filter(x=>x&&x.status==='queue');
+ const orderedIds=new Set(preferredQueue.map(x=>x.id));
+ const otherQueue=state.subjects.filter(x=>x.status==='queue'&&!orderedIds.has(x.id));
+ const activeSubjects=state.subjects.filter(x=>x.status==='active');
+ const archivedSubjects=state.subjects.filter(x=>x.status!=='active'&&x.status!=='queue');
+ state.subjects=[...activeSubjects,...preferredQueue,...otherQueue,...archivedSubjects];
+ // Current BB subjects point to Portuguese first; Portuguese then points to Mathematics.
+ ['bb-adm-s','bb-port-s','bb-info-s','bb-cb-s'].forEach(id=>{const sub=byId.get(id);if(sub&&sub.status==='active')sub.next=byId.has('port-s')?'port-s':null;});
+ STRATEGY_QUEUE_ORDER.forEach((id,index)=>{
+  const sub=byId.get(id);if(!sub)return;
+  const nextId=STRATEGY_QUEUE_ORDER.slice(index+1).find(candidate=>byId.has(candidate))||null;
+  sub.next=nextId;
+ });
+ state.strategyVersion=STRATEGY_VERSION;
+ return state;
+}
+function load(){
+ try{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)return normalizeData(clone(DEFAULT_DATA));
+  const parsed=JSON.parse(raw);let normalized=normalizeData(parsed);
+  const needsStrategyMigration=(normalized.strategyVersion||0)<STRATEGY_VERSION;
+  if(needsStrategyMigration)normalized=normalizeData(applyStrategyMigration(normalized));
+  if(!parsed.schemaVersion||parsed.schemaVersion!==SCHEMA_VERSION||needsStrategyMigration){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(normalized));}catch(e){storageWarning=true;}}
+  return normalized;
+ }catch(error){
+  storageWarning=true;
+  try{storageRecoveryRaw=localStorage.getItem(STORAGE_KEY);if(storageRecoveryRaw)localStorage.setItem(STORAGE_KEY+'_recovery_'+Date.now(),storageRecoveryRaw);}catch(e){}
+  return normalizeData(clone(DEFAULT_DATA));
+ }
+}
+let data=load();
+lastPersisted=clone(data);
+function save(){
+ try{
+  const candidate=normalizeData(data),serialized=JSON.stringify(candidate);
+  localStorage.setItem(STORAGE_KEY,serialized);data=candidate;lastPersisted=clone(candidate);render();return true;
+ }catch(error){
+  data=clone(lastPersisted);try{render();}catch(e){}
+  toast('Alteração não salva: '+(error?.message||'erro de validação ou armazenamento.'));
+  return false;
+ }
+}
+function recordHistory(type,subject,detail=''){
+ data.history.push({type,subjectId:subject?.id||null,subjectName:subject?.name||'',date:dateString(todayLocal()),detail:String(detail||'')});
+ data.history=data.history.slice(-500);
+}
+function toast(message){const t=document.getElementById('toast');t.textContent=message;t.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display='none',3000);}
+function isStudyDay(date){const day=date.getDay(),settings=data.settings;if(settings.studyDays==='all')return true;if(settings.studyDays==='mon-fri')return day>=1&&day<=5;if(settings.studyDays==='mon-sat')return day>=1&&day<=6;return settings.customDays.includes(day===0?7:day);}
+function nextStudyOnOrAfter(date){const d=new Date(date);d.setHours(12,0,0,0);for(let i=0;i<15&&!isStudyDay(d);i++)d.setDate(d.getDate()+1);if(!isStudyDay(d))throw new Error('Não há dias de estudo configurados.');return d;}
+function nextStudyAfter(date){const d=new Date(date);d.setHours(12,0,0,0);d.setDate(d.getDate()+1);return nextStudyOnOrAfter(d);}
+function addStudyDaysInclusive(start,count){let d=nextStudyOnOrAfter(start),remaining=Math.max(0,Math.ceil(count));if(remaining===0)return d;const perWeek=studyDayCount(data.settings);if(!perWeek)throw new Error('Nenhum dia de estudo configurado.');const fullWeeks=Math.floor((remaining-1)/perWeek);d.setDate(d.getDate()+fullWeeks*7);let extra=(remaining-1)%perWeek;while(extra>0){d.setDate(d.getDate()+1);if(isStudyDay(d))extra--;}return d;}
+function daysNeeded(cards,progress=0){return Math.ceil(Math.max(0,cards-progress)/Math.max(1,data.settings.cardsDay));}
+function active(){return data.subjects.filter(s=>s.status==='active');}
+function queue(){return data.subjects.filter(s=>s.status==='queue');}
+function findSubject(id){return data.subjects.find(s=>s.id===id)||null;}
+function prerequisitesReady(subject){return (subject.prerequisites||[]).every(id=>findSubject(id)?.status==='done');}
+function blockedReason(subject){
+ const missing=(subject.prerequisites||[]).map(findSubject).filter(s=>!s||s.status!=='done');
+ if(missing.length)return 'Aguardando '+missing.map(s=>s?.name||'dependência removida').join(', ');
+ const today=dateString(todayLocal());if(subject.notBefore&&subject.notBefore>today)return 'Aguardando liberação em '+fmtDate(parseDate(subject.notBefore));
+ return '';
+}
+function eligible(subject){return subject.status==='queue'&&prerequisitesReady(subject)&&(!subject.notBefore||subject.notBefore<=dateString(todayLocal()));}
+function nextActivationOrder(){return Math.max(0,...data.subjects.map(s=>s.activationOrder||0))+1;}
+function promoteNext(preferredIds=[],anchorDate=null){
+ const preferred=[...new Set(preferredIds.filter(Boolean))];
+ while(active().length<data.settings.slots){
+  let candidate=preferred.map(findSubject).find(s=>s&&eligible(s));
+  if(candidate)preferred.splice(preferred.indexOf(candidate.id),1);
+  else candidate=queue().find(eligible);
+  if(!candidate)break;
+  candidate.status='active';candidate.activationOrder=nextActivationOrder();candidate.activatedAt=dateString(todayLocal());
+  const base=anchorDate?nextStudyAfter(anchorDate):nextStudyOnOrAfter(todayLocal());
+  candidate.earliestStartAt=dateString(base);delete candidate.suspendedFromStatus;
+ }
+}
+function reconcileSlots(){
+ const actives=active().sort((a,b)=>(a.activationOrder||0)-(b.activationOrder||0)||data.subjects.indexOf(a)-data.subjects.indexOf(b));
+ actives.slice(data.settings.slots).forEach(sub=>{sub.status='queue';sub.activationOrder=0;});
+ promoteNext();
+}
+function activeForecastStart(subject){
+ const today=todayLocal(),settingsStart=parseDate(data.settings.startDate),earliest=parseDate(subject.earliestStartAt);
+ let base=maxDate(today,earliest);
+ if(!subject.startedAt&&!subject.earliestStartAt&&settingsStart>today)base=settingsStart;
+ return nextStudyOnOrAfter(base||today);
+}
+function buildSchedule(){
+ const plan={},slots=[];
+ active().forEach(sub=>{
+  const start=activeForecastStart(sub),finish=addStudyDaysInclusive(start,daysNeeded(sub.cards,sub.progress));
+  plan[sub.id]={start,finish,actualStart:sub.startedAt?parseDate(sub.startedAt):null,projectedStart:!sub.startedAt};
+  slots.push({finish,subject:sub,order:sub.activationOrder||data.subjects.indexOf(sub)});
+ });
+ const pending=queue().slice();
+ if(!slots.length&&pending.length){const base=maxDate(todayLocal(),parseDate(data.settings.startDate));slots.push({finish:null,subject:null,seedStart:nextStudyOnOrAfter(base),order:-1});}
+ function prereqReadyAt(subject){
+  let ready=null;
+  for(const id of subject.prerequisites||[]){
+   const dep=findSubject(id);if(!dep)return undefined;
+   if(dep.status==='done'){ready=maxDate(ready,parseDate(dep.completedAt)||todayLocal());continue;}
+   const scheduled=plan[id];if(!scheduled)return undefined;ready=maxDate(ready,scheduled.finish);
+  }
+  return ready;
+ }
+ let guard=0;
+ while(pending.length&&slots.length&&guard++<data.subjects.length*3){
+  slots.sort((a,b)=>{if(!a.finish&&!b.finish)return a.order-b.order;if(!a.finish)return-1;if(!b.finish)return 1;return a.finish-b.finish||a.order-b.order;});
+  const slot=slots.shift();
+  const slotStart=slot.subject?nextStudyAfter(slot.finish):slot.seedStart;
+  const candidates=pending.map(sub=>{
+   const ready=prereqReadyAt(sub);if(ready===undefined)return null;
+   let minStart=slotStart;
+   if(ready)minStart=maxDate(minStart,nextStudyAfter(ready));
+   if(sub.notBefore)minStart=maxDate(minStart,parseDate(sub.notBefore));
+   return {sub,ready,start:nextStudyOnOrAfter(minStart)};
+  }).filter(Boolean);
+  if(!candidates.length){slots.push(slot);break;}
+  // Uma matéria bloqueada não reserva uma vaga que outra já elegível pode usar.
+  // Primeiro vem a menor data real de elegibilidade; a prioridade/next desempata.
+  const earliestTime=Math.min(...candidates.map(x=>x.start.getTime()));
+  const earliestCandidates=candidates.filter(x=>x.start.getTime()===earliestTime);
+  let chosen=null;
+  const preferredId=slot.subject?.next;
+  if(preferredId)chosen=earliestCandidates.find(x=>x.sub.id===preferredId)||null;
+  if(!chosen)chosen=earliestCandidates[0];
+  const {sub,start}=chosen;
+  pending.splice(pending.indexOf(sub),1);
+  const finish=addStudyDaysInclusive(start,daysNeeded(sub.cards,sub.progress));
+  plan[sub.id]={start,finish,actualStart:null,projectedStart:true};
+  slots.push({finish,subject:sub,order:data.subjects.indexOf(sub)});
+ }
+ return plan;
+}
+function estimate(subject){const plan=buildSchedule();return plan[subject.id]?.finish||null;}
+function completeSubject(id){
+ const sub=findSubject(id);if(!sub||sub.status!=='active')return;
+ const completed=dateString(todayLocal()),preferred=sub.next;
+ sub.status='done';sub.completedAt=completed;sub.progress=Math.max(sub.progress,sub.cards);
+ recordHistory('completed',sub,'Conclusão registrada pelo usuário.');
+ promoteNext([preferred],parseDate(completed));if(save())toast('Matéria concluída. Previsões e fila atualizadas.');
+}
+function startSubject(id){const sub=findSubject(id);if(!sub||sub.status!=='active'||sub.startedAt)return;sub.startedAt=dateString(todayLocal());recordHistory('started',sub,'Início real informado pelo usuário.');if(save())toast('Início real registrado.');}
+function suspendSubject(id){const sub=findSubject(id);if(!sub||!['active','queue'].includes(sub.status))return;sub.suspendedFromStatus=sub.status;sub.suspendedActivationOrder=sub.activationOrder||0;sub.status='suspended';sub.activationOrder=0;recordHistory('suspended',sub);promoteNext();if(save())toast('Matéria suspensa; vaga reorganizada.');}
+function resumeSubject(id){const sub=findSubject(id);if(!sub||sub.status!=='suspended')return;const wasActive=sub.suspendedFromStatus==='active';sub.status='queue';delete sub.suspendedFromStatus;delete sub.suspendedActivationOrder;promoteNext(wasActive?[id]:[]);if(save())toast('Matéria reativada.');}
+function deleteSubject(id){const sub=findSubject(id);if(!sub)return;const name=sub.name;data.subjects=data.subjects.filter(s=>s.id!==id);data.subjects.forEach(s=>{if(s.next===id)s.next=null;s.prerequisites=(s.prerequisites||[]).filter(x=>x!==id);});recordHistory('deleted',{id,name},'Matéria excluída do planejamento.');promoteNext();if(save())toast('Matéria excluída e referências atualizadas.');}
+function setSubjectTotal(id,total){
+ const sub=findSubject(id);if(!sub)return false;
+ const leaves=leavesForDeckIds(sub.deckIds);if(!leaves.length)throw new Error('A matéria não possui decks válidos para vincular os cards.');
+ const old=new Map(leaves.map(n=>[n.id,n.cards]));const allocation=distributeInteger(total,leaves);
+ leaves.forEach((n,i)=>n.cards=allocation[i]);
+ const newMap=new Map(leaves.map(n=>[n.id,n.cards]));
+ data.subjects.forEach(other=>{if(other.id===id){other.cards=total;return;}const ids=new Set(collectLeavesForIds(data.decks,other.deckIds));let delta=0;ids.forEach(leafId=>{if(old.has(leafId))delta+=(newMap.get(leafId)||0)-(old.get(leafId)||0);});if(delta)other.cards=Math.max(0,other.cards+delta);});
+ recomputeDeckTotals();recordHistory('cards-updated',sub,`Total alterado para ${total}. O progresso registrado foi preservado.`);return true;
+}
+function setDeckTotal(id,total){
+ const node=findNode(id);if(!node)return false;
+ const leaves=leafNodes(node),old=new Map(leaves.map(n=>[n.id,n.cards]));setSubtreeTotal(node,total);
+ const updated=leafNodes(node),fresh=new Map(updated.map(n=>[n.id,n.cards]));
+ data.subjects.forEach(sub=>{let delta=0;collectLeavesForIds(data.decks,sub.deckIds).forEach(leafId=>{if(old.has(leafId))delta+=(fresh.get(leafId)||0)-(old.get(leafId)||0);});if(delta)sub.cards=Math.max(0,sub.cards+delta);});
+ recomputeDeckTotals();recordHistory('deck-cards-updated',{id,name:node.name},`Total do deck atualizado para ${total}.`);return true;
+}
+function setProgress(id,value){
+ const sub=findSubject(id);if(!sub||sub.status==='done')return false;
+ const amount=Number(value);if(!Number.isSafeInteger(amount)||amount<0||amount>MAX_CARDS)throw new Error(`Informe um progresso entre 0 e ${MAX_CARDS.toLocaleString('pt-BR')}.`);
+ sub.progress=amount;recordHistory('progress-updated',sub,`Progresso conhecido ajustado para ${amount} cards.`);return save();
+}
+function editSubjectProgress(id){
+ const sub=findSubject(id);if(!sub||sub.status==='done')return;
+ openModal(`<h3>Progresso conhecido</h3><p>Este ajuste é opcional: você <strong>não precisa informar cards todos os dias</strong>. Informe apenas um total que você saiba com segurança. Se não souber, mantenha o valor atual; o aplicativo não estimará progresso por conta própria.</p><div class="field"><label for="progressInput">Cards já estudados / concluídos</label><input id="progressInput" type="number" min="0" max="10000000" step="1" value="${sub.progress||0}"></div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="primary" id="saveProgress">Salvar progresso conhecido</button></div>`);
+ document.getElementById('saveProgress').onclick=()=>{try{const value=Number(document.getElementById('progressInput').value);if(setProgress(id,value)){closeModal();toast('Progresso conhecido atualizado; previsões recalculadas.');}}catch(e){toast(e.message);}};
+}
+function setPage(page){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id==='page-'+page));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='calendar')renderCalendar();window.scrollTo({top:0,behavior:'smooth'});}
+document.querySelectorAll('.navbtn').forEach(button=>button.addEventListener('click',()=>setPage(button.dataset.page)));
+function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;}
+function esc(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function openModal(content){const back=document.getElementById('modalBack');document.getElementById('modal').innerHTML=content;back.classList.add('show');back.querySelectorAll('[data-close]').forEach(x=>x.onclick=closeModal);}
+function closeModal(){document.getElementById('modalBack').classList.remove('show');}
+document.getElementById('modalBack').addEventListener('click',event=>{if(event.target.id==='modalBack')closeModal();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeModal();});
+function subjectCard(sub,editable=false){
+ const box=el('article','subject'),head=el('div','subjectHead'),left=el('div');
+ left.append(el('div','subjectName',sub.name));left.append(el('div','subjectMeta',`${sub.cards.toLocaleString('pt-BR')} cards novos${sub.progress?` · ${sub.progress.toLocaleString('pt-BR')} registrados`:''}`));head.append(left);
+ const plan=buildSchedule()[sub.id];head.append(el('div','percent',plan?'Até '+fmtDate(plan.finish):sub.status==='done'?'Concluída':''));box.append(head);
+ const foot=el('div','subjectFoot');foot.append(el('span','subtle',plan?'Previsão de término: '+fmtDate(plan.finish):sub.completedAt?'Concluída em '+fmtDate(parseDate(sub.completedAt)):'Sem previsão disponível'));
+ if(editable){
+  const controls=el('div');controls.style.display='flex';controls.style.gap='6px';controls.style.flexWrap='wrap';
+  if(!sub.startedAt){const start=el('button','secondary','Marcar início real');start.addEventListener('click',()=>startSubject(sub.id));controls.append(start);}
+  const edit=el('button','secondary','Editar total');edit.addEventListener('click',()=>editSubjectTotal(sub.id));controls.append(edit);
+  const options=el('button','secondary','Opções');options.addEventListener('click',()=>subjectOptions(sub.id));controls.append(options);
+  const done=el('button','primary','Concluir matéria');done.addEventListener('click',()=>confirmComplete(sub.id));controls.append(done);
+  foot.append(controls);
+ }else foot.append(el('span','tag',sub.status==='done'?'Concluída':sub.status==='suspended'?'Suspensa':'Em andamento'));
+ box.append(foot);return box;
+}
+function editSubjectTotal(id){
+ const sub=findSubject(id);if(!sub)return;
+ openModal(`<h3>Quantidade de cards</h3><p>Atualize o total de cards novos de <strong>${esc(sub.name)}</strong>. O progresso registrado será preservado; se o total ficar abaixo dele, a previsão passa a considerar zero card restante.</p><div class="field"><label for="subjectTotalInput">Total de cards</label><input id="subjectTotalInput" type="number" min="0" max="10000000" step="1" value="${sub.cards}"></div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="primary" id="saveSubjectTotal">Salvar quantidade</button></div>`);
+ document.getElementById('saveSubjectTotal').onclick=()=>{const value=Number(document.getElementById('subjectTotalInput').value);if(!Number.isSafeInteger(value)||value<0||value>MAX_CARDS){toast(`Informe uma quantidade entre 0 e ${MAX_CARDS.toLocaleString('pt-BR')}.`);return;}try{setSubjectTotal(id,value);closeModal();if(save())toast('Quantidade atualizada; histórico e progresso preservados.');}catch(e){toast(e.message);}};
+}
+function confirmComplete(id){const sub=findSubject(id);if(!sub)return;openModal(`<h3>Concluir matéria?</h3><p>Confirma que terminou <strong>${esc(sub.name)}</strong>? A data real será registrada, a vaga será liberada e a sequência estratégica será atualizada.</p><div class="warning">Esta ação registra uma conclusão real e não é desfeita silenciosamente.</div><div class="modalActions"><button class="secondary" data-close>Voltar</button><button class="primary" id="confirmAction">Confirmar conclusão</button></div>`);document.getElementById('confirmAction').onclick=()=>{closeModal();completeSubject(id);};}
+function subjectOptions(id){
+ const sub=findSubject(id);if(!sub)return;
+ const suspended=sub.status==='suspended',completed=sub.status==='done';
+ const stateAction=suspended?'<button class="secondary" id="resumeOne">Reativar</button>':completed?'':'<button class="secondary" id="suspendOne">Suspender</button>';
+ const statusLine=completed?`Concluída em ${sub.completedAt?fmtDate(parseDate(sub.completedAt)):'data não registrada'}.`:suspended?'Matéria suspensa.':`Prioridade atual na ordem do planejamento: ${data.subjects.indexOf(sub)+1}.`;
+ openModal(`<h3>${esc(sub.name)}</h3><p>${statusLine} ${sub.next?`Ao concluir esta matéria, <strong>${esc(findSubject(sub.next)?.name||'a próxima vinculada')}</strong> recebe preferência para a vaga.`:'Não há próxima matéria vinculada; a fila estratégica será usada.'}</p><div class="modalActions"><button class="secondary" id="rulesSubject" ${completed?'disabled':''}>Dependências / liberação</button><button class="secondary" id="editSubject">Editar total</button></div>${completed?'':'<div class="modalActions"><button class="secondary" id="progressSubject">Ajustar progresso (opcional)</button></div>'}<div class="modalActions">${stateAction}<button class="danger" id="deleteOne">Excluir matéria</button></div><div class="modalActions"><button class="secondary" data-close>Fechar</button></div>`);
+ document.getElementById('rulesSubject').onclick=()=>{if(!completed){closeModal();editSubjectRules(id);}};document.getElementById('editSubject').onclick=()=>{closeModal();editSubjectTotal(id);};document.getElementById('deleteOne').onclick=()=>{closeModal();confirmDeleteSubject(id);};
+ if(!completed)document.getElementById('progressSubject').onclick=()=>{closeModal();editSubjectProgress(id);};
+ if(suspended)document.getElementById('resumeOne').onclick=()=>{closeModal();resumeSubject(id);};else if(!completed)document.getElementById('suspendOne').onclick=()=>{closeModal();suspendSubject(id);};
+}
+function confirmDeleteSubject(id){const sub=findSubject(id);if(!sub)return;openModal(`<h3>Excluir matéria?</h3><p>Confirma a exclusão de <strong>${esc(sub.name)}</strong> do planejamento? Os decks do Anki não serão apagados.</p><div class="warning">O histórico da ação será preservado no registro local. Dependências e vínculos de sequência serão limpos.</div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="danger" id="confirmDeleteSubject">Excluir</button></div>`);document.getElementById('confirmDeleteSubject').onclick=()=>{closeModal();deleteSubject(id);};}
+function editSubjectRules(id){
+ const sub=findSubject(id);if(!sub)return;const options=data.subjects.filter(s=>s.id!==id).map(s=>`<label class="dependencyOption"><input type="checkbox" value="${esc(s.id)}" ${(sub.prerequisites||[]).includes(s.id)?'checked':''}> <span>${esc(s.name)}</span></label>`).join('');
+ openModal(`<h3>Dependências e liberação</h3><p><strong>${esc(sub.name)}</strong> só poderá entrar automaticamente depois que todas as dependências selecionadas forem concluídas. Uma data futura também pode bloquear seu início.</p><div class="dependencyList">${options||'<p>Nenhuma outra matéria cadastrada.</p>'}</div><div class="field" style="margin-top:12px"><label for="notBeforeInput">Não iniciar antes de (opcional)</label><input id="notBeforeInput" type="date" value="${sub.notBefore||''}"></div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="primary" id="saveRules">Salvar regras</button></div>`);
+ document.getElementById('saveRules').onclick=()=>{const candidate=[...document.querySelectorAll('.dependencyOption input:checked')].map(x=>x.value),date=document.getElementById('notBeforeInput').value||null;try{const draft=clone(data);const target=draft.subjects.find(s=>s.id===id);target.prerequisites=candidate;target.notBefore=date;assertAcyclic(draft.subjects,'prerequisites');if(date&&!parseDate(date))throw new Error('Informe uma data válida.');data=draft;recordHistory('rules-updated',findSubject(id),'Dependências e data de liberação atualizadas.');closeModal();if(save())toast('Regras de liberação atualizadas.');}catch(e){toast(e.message);}};
+}
+function renderHome(){
+ const subjects=data.subjects.filter(s=>s.status!=='suspended'),done=subjects.filter(s=>s.status==='done').length,total=subjects.length,pct=total?Math.round(done/total*100):0,a=active();
+ document.getElementById('overallBar').style.width=pct+'%';document.getElementById('overallText').textContent=pct+'% das matérias concluídas';document.getElementById('remainingText').textContent=(total-done)+' matérias no ciclo';document.getElementById('activePill').textContent=a.length+' / '+data.settings.slots+' vagas ativas';document.getElementById('statActive').textContent=a.length;document.getElementById('statWeek').textContent=(data.settings.cardsDay*data.settings.daysWeek*data.settings.slots).toLocaleString('pt-BR');
+ const plan=buildSchedule(),nearest=a.map(s=>plan[s.id]).filter(Boolean).sort((x,y)=>x.finish-y.finish)[0];document.getElementById('statFinish').textContent=nearest?fmtDate(nearest.finish):'—';document.getElementById('todayLine').textContent=`${data.settings.cardsDay} cards por matéria · ${data.settings.daysWeek} dias por semana`;
+ const list=document.getElementById('activeSubjects');list.innerHTML='';if(!a.length)list.append(el('div','empty','Nenhuma matéria ativa no momento.'));a.forEach(s=>list.append(subjectCard(s)));
+ const q=queue(),next=document.getElementById('nextSubject');next.innerHTML='';const preferred=a.map(s=>s.next).map(findSubject).find(s=>s&&eligible(s));const n=preferred||q.find(eligible);
+ if(n){next.append(el('div','eyebrow','PRÓXIMA MATÉRIA ELEGÍVEL'));next.append(el('strong','',n.name));next.append(el('p','',`${n.cards} cards · prioridade ${data.subjects.indexOf(n)+1}${blockedReason(n)?' · '+blockedReason(n):''}`));}else next.append(el('p','subtle',q.length?'As matérias pendentes estão bloqueadas por dependências ou data de liberação.':'Não há matérias pendentes na fila.'));
+ document.getElementById('ruleSummary').textContent=`${data.settings.slots} vagas simultâneas · ${data.settings.cardsDay} cards por matéria/dia · ${data.settings.daysWeek} dias/semana.`;
+}
+function moveQueue(id,direction){const indexes=data.subjects.map((s,i)=>s.status==='queue'?i:-1).filter(i=>i>=0),current=data.subjects.findIndex(s=>s.id===id),position=indexes.indexOf(current),target=indexes[position+direction];if(position<0||target===undefined)return;[data.subjects[current],data.subjects[target]]=[data.subjects[target],data.subjects[current]];recordHistory('priority-changed',findSubject(id),`Posição estratégica alterada para ${target+1}.`);save();}
+function renderCycle(){
+ const box=document.getElementById('cycleSubjects');box.innerHTML='';const a=active();if(!a.length)box.append(el('div','empty','Nenhuma matéria ativa. Verifique a fila ou aumente o número de vagas.'));a.forEach(s=>box.append(subjectCard(s,true)));
+ const q=document.getElementById('queueList');q.innerHTML='';const plan=buildSchedule();
+ queue().forEach((sub,i)=>{const row=el('div','queueItem');row.append(el('div','rank',String(i+1)));const details=el('div');details.style.flex='1';details.append(el('strong','',sub.name));const blocked=blockedReason(sub),forecast=plan[sub.id];details.append(el('small','',`${sub.cards.toLocaleString('pt-BR')} cards · ${blocked|| (forecast?`previsão ${fmtDate(forecast.start)}–${fmtDate(forecast.finish)}`:`aguardando vaga`)} · prioridade ${data.subjects.indexOf(sub)+1}`));row.append(details);
+  const controls=el('div');controls.style.display='flex';controls.style.gap='4px';const up=el('button','mini','↑');up.title='Aumentar prioridade';up.disabled=i===0;up.onclick=()=>moveQueue(sub.id,-1);const down=el('button','mini','↓');down.title='Reduzir prioridade';down.disabled=i===q.children.length-1;down.onclick=()=>moveQueue(sub.id,1);const edit=el('button','mini','⋯');edit.title='Opções';edit.onclick=()=>subjectOptions(sub.id);controls.append(up,down,edit);row.append(controls);q.append(row);
+ });if(!q.children.length)q.append(el('div','subtle','Fila vazia.'));
+ const archive=document.getElementById('archiveSubjects');archive.innerHTML='';const archived=data.subjects.filter(sub=>sub.status==='done'||sub.status==='suspended');
+ if(!archived.length)archive.append(el('div','empty','Ainda não há matérias concluídas ou suspensas.'));
+ archived.forEach(sub=>{const card=el('article','subject'),head=el('div','subjectHead'),left=el('div');left.append(el('div','subjectName',sub.name));left.append(el('div','subjectMeta',`${sub.cards.toLocaleString('pt-BR')} cards · ${sub.status==='done'?(sub.completedAt?'Concluída em '+fmtDate(parseDate(sub.completedAt)):'Conclusão registrada sem data'): 'Suspensa'}`));head.append(left);head.append(el('span','tag',sub.status==='done'?'Concluída':'Suspensa'));card.append(head);const foot=el('div','subjectFoot'),opts=el('button','secondary','Opções');opts.onclick=()=>subjectOptions(sub.id);foot.append(el('span','subtle',sub.status==='done'?'Registro preservado no histórico':'Pode ser reativada quando desejar'));foot.append(opts);card.append(foot);archive.append(card);});
+}
+function dateKey(date){return dateString(date);}
+function eventsForMonth(){
+ const events={},plan=buildSchedule();
+ const add=(key,event)=>{(events[key] ||= []).push(event);};
+ data.subjects.forEach(sub=>{
+  if(sub.status==='done'){
+   if(sub.startedAt)add(sub.startedAt,{type:'start',subject:sub,actual:true});
+   if(sub.completedAt)add(sub.completedAt,{type:'finish',subject:sub,actual:true});
+   return;
+  }
+  const item=plan[sub.id];if(!item)return;
+  if(sub.status==='active'&&sub.startedAt)add(sub.startedAt,{type:'start',subject:sub,actual:true});
+  else add(dateKey(item.start),{type:'start',subject:sub,actual:false});
+  add(dateKey(item.finish),{type:'finish',subject:sub,actual:false});
+ });return events;
+}
+function showCalendarDay(date,events){
+ const dayText=date.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});let content=`<h3>${dayText.charAt(0).toUpperCase()+dayText.slice(1)}</h3>`;
+ if(!events.length)content+='<p>Não há início ou término de matéria previsto ou registrado neste dia.</p>';
+ else{content+='<div class="eventModalList">';events.forEach(ev=>{const finish=ev.type==='finish',label=finish?(ev.actual?'CONCLUSÃO REAL':'PREVISÃO DE TÉRMINO'):(ev.actual?'INÍCIO REAL':'PREVISÃO DE INÍCIO'),description=finish?(ev.actual?'A matéria foi marcada como concluída neste dia.':'Esta é uma previsão; a data poderá mudar conforme o planejamento.'):(ev.actual?'O usuário registrou o início real dos estudos nesta data.':'Início estimado dos estudos, sujeito à liberação de vaga e às regras da fila.');content+=`<div class="eventModalItem"><span class="eventType ${finish?'finish':'start'} ${ev.actual?'actual':''}">${label}</span><strong>${esc(ev.subject.name)}</strong><p>${description}</p></div>`;});content+='</div>';}
+ content+='<div class="modalActions"><button class="primary" data-close>Fechar</button></div>';openModal(content);
+}
+function renderCalendar(){
+ const grid=document.getElementById('calendarGrid');if(!grid)return;grid.innerHTML='';if(!calendarCursor){const d=maxDate(todayLocal(),parseDate(data.settings.startDate));calendarCursor=new Date(d.getFullYear(),d.getMonth(),1,12);}
+ const year=calendarCursor.getFullYear(),month=calendarCursor.getMonth(),monthDate=new Date(year,month,1,12);document.getElementById('calendarMonth').textContent=monthDate.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});const chip=document.getElementById('calendarMonthChip');if(chip)chip.textContent=monthDate.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}).toUpperCase();
+ const events=eventsForMonth(),firstDay=monthDate.getDay(),daysInMonth=new Date(year,month+1,0).getDate();for(let i=0;i<firstDay;i++)grid.append(el('div','day emptyDay',''));
+ const todayKey=dateKey(todayLocal());
+ for(let day=1;day<=daysInMonth;day++){
+  const date=new Date(year,month,day,12),key=dateKey(date),dayEvents=events[key]||[],hasFinish=dayEvents.some(e=>e.type==='finish'),hasStart=dayEvents.some(e=>e.type==='start'),actual=dayEvents.some(e=>e.actual);
+  let cls='day';if(!isStudyDay(date))cls+=' off';if(hasFinish&&hasStart)cls+=' multiEvent';else if(hasFinish)cls+=' finishDay';else if(hasStart)cls+=' startDay';if(actual)cls+=' hasActual';if(key===todayKey)cls+=' today';
+  const cell=el('button',cls);cell.type='button';cell.append(el('div','d',['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][date.getDay()]));cell.append(el('strong','',String(day)));if(hasFinish)cell.append(el('span','eventTag',dayEvents.some(e=>e.type==='finish'&&e.actual)?'Real':'Prev. fim'));if(hasStart)cell.append(el('span','eventTag',dayEvents.some(e=>e.type==='start'&&e.actual)?'Real início':'Início'));if(!dayEvents.length)cell.append(el('em','',isStudyDay(date)?'estudo':'folga'));cell.addEventListener('click',()=>showCalendarDay(date,dayEvents));grid.append(cell);
+ }
+ const used=firstDay+daysInMonth,trailing=(7-used%7)%7;for(let i=0;i<trailing;i++)grid.append(el('div','day emptyDay',''));
+ const list=document.getElementById('dateList');list.innerHTML='';const plan=buildSchedule(),sorted=data.subjects.filter(s=>plan[s.id]).sort((a,b)=>plan[a.id].finish-plan[b.id].finish);
+ sorted.forEach(sub=>{const row=el('div','queueItem'),d=el('div');d.style.flex='1';d.append(el('strong','',sub.name));d.append(el('small','',`${sub.cards.toLocaleString('pt-BR')} cards · ${sub.startedAt?'início real '+fmtDate(parseDate(sub.startedAt)):'início previsto '+fmtDate(plan[sub.id].start)}`));row.append(d);row.append(el('span','tag','Prev. '+fmtDate(plan[sub.id].finish)));list.append(row);});if(!sorted.length)list.append(el('div','subtle','Sem matérias com previsão disponível.'));
+}
+document.getElementById('prevMonth').addEventListener('click',()=>{if(!calendarCursor)renderCalendar();calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar();});
+document.getElementById('nextMonth').addEventListener('click',()=>{if(!calendarCursor)renderCalendar();calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar();});
+function renderTree(){
+ const root=document.getElementById('deckTree');root.innerHTML='';
+ function nodeView(node,depth=0){const wrap=el('div','treeNode'),line=el('div','treeLine');line.append(el('span','',node.children?.length?'▸':'▧'));line.append(el('div','treeName',node.name));line.append(el('span','treeCount',node.cards.toLocaleString('pt-BR')));const actions=el('div','treeActions'),options=el('button','mini','⋯');options.title='Opções';options.onclick=()=>deckOptions(node.id);actions.append(options);line.append(actions);wrap.append(line);if(node.children?.length){const children=el('div','children');node.children.forEach(child=>children.append(nodeView(child,depth+1)));wrap.append(children);}return wrap;}
+ data.decks.forEach(node=>root.append(nodeView(node)));
+}
+function deckOptions(id){
+ const node=findNode(id);if(!node)return;const ids=collectIds(node),hasSuspended=data.subjects.some(s=>s.status==='suspended'&&s.deckIds.some(x=>ids.includes(x))),linked=data.subjects.some(s=>collectLeavesForIds(data.decks,s.deckIds).some(x=>leafNodes(node).some(l=>l.id===x))),canAddChild=node.children?.length||(!node.cards&&!linked);
+ openModal(`<h3>${esc(node.name)}</h3><p>${node.cards.toLocaleString('pt-BR')} cards cadastrados${node.children?.length?` · ${node.children.length} subdecks diretos`:''}.</p><div class="modalActions"><button class="secondary" id="editDeck">Editar nome / mover</button><button class="secondary" id="editDeckCount">Editar cards</button></div><div class="modalActions"><button class="secondary" id="addSubdeck" ${canAddChild?'':'disabled'}>＋ Subdeck</button><button class="secondary" id="addSubject" ${(node.children?.length||linked)?'disabled':''}>＋ Matéria ao ciclo</button></div><div class="modalActions">${hasSuspended?'<button class="secondary" id="resumeDeck">Reativar</button>':''}<button class="secondary" id="suspendDeck">Suspender</button><button class="danger" id="deleteDeck">Excluir</button></div><div class="modalActions"><button class="secondary" data-close>Cancelar</button></div>`);
+ document.getElementById('editDeck').onclick=()=>{closeModal();editDeckDetails(id);};document.getElementById('editDeckCount').onclick=()=>{closeModal();editDeckTotal(id);};document.getElementById('addSubdeck').onclick=()=>{closeModal();createDeckModal(id);};document.getElementById('addSubject').onclick=()=>{closeModal();createSubjectForDeck(id);};
+ if(hasSuspended)document.getElementById('resumeDeck').onclick=()=>{closeModal();resumeNode(id);};document.getElementById('suspendDeck').onclick=()=>{closeModal();suspendNode(id);};document.getElementById('deleteDeck').onclick=()=>{closeModal();confirmDelete(id);};
+}
+function editDeckDetails(id){
+ const node=findNode(id);if(!node)return;const descendants=new Set(collectIds(node));const options=['<option value="">Raiz</option>'];walk(data.decks,n=>{if(n.id===id||descendants.has(n.id))return;if(n.children?.length||(!n.cards&&!data.subjects.some(s=>s.deckIds.includes(n.id))))options.push(`<option value="${esc(n.id)}">${'— '.repeat(depthOf(n.id))}${esc(n.name)}</option>`);});
+ const currentParent=findParent(data.decks,id);openModal(`<h3>Editar deck</h3><div class="field"><label for="deckNameEdit">Nome</label><input id="deckNameEdit" value="${esc(node.name)}"></div><div class="field" style="margin-top:10px"><label for="deckParentEdit">Mover para</label><select id="deckParentEdit">${options.join('')}</select></div><div class="hint">Mover não altera os identificadores nem os vínculos das matérias. Um deck não pode ser movido para dentro de si mesmo ou de um descendente.</div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="primary" id="saveDeckDetails">Salvar</button></div>`);
+ document.getElementById('deckParentEdit').value=currentParent?.id||'';
+ document.getElementById('saveDeckDetails').onclick=()=>{const name=document.getElementById('deckNameEdit').value.trim(),parentId=document.getElementById('deckParentEdit').value||null;if(!name){toast('Informe um nome.');return;}const draft=clone(data);try{data=draft;const fresh=findNode(id);fresh.name=name;if(parentId!== (findParent(data.decks,id)?.id||null))moveDeckNode(id,parentId);recordHistory('deck-updated',{id,name},'Nome ou posição hierárquica alterada.');closeModal();if(save())toast('Deck atualizado.');}catch(e){data=clone(lastPersisted);render();toast(e.message);}};
+}
+function depthOf(id){let depth=0;function search(nodes,d){for(const n of nodes){if(n.id===id){depth=d;return true;}if(n.children?.length&&search(n.children,d+1))return true;}return false;}search(data.decks,0);return depth;}
+function removeNodeFromTree(nodes,id){const i=nodes.findIndex(n=>n.id===id);if(i>=0)return nodes.splice(i,1)[0];for(const n of nodes){if(n.children?.length){const found=removeNodeFromTree(n.children,id);if(found)return found;}}return null;}
+function moveDeckNode(id,newParentId){
+ const node=findNode(id);if(!node)throw new Error('Deck não encontrado.');const ids=new Set(collectIds(node));if(newParentId&&ids.has(newParentId))throw new Error('Não é possível mover um deck para dentro de si mesmo.');const target=newParentId?findNode(newParentId):null;if(newParentId&&!target)throw new Error('Deck de destino não encontrado.');if(target&&!target.children?.length&&target.cards>0)throw new Error('O destino é um subdeck com cards próprios; escolha um deck-pai.');
+ const moved=removeNodeFromTree(data.decks,id);if(!moved)throw new Error('Não foi possível mover o deck.');if(target){const fresh=findNode(newParentId);fresh.children=fresh.children||[];fresh.children.push(moved);}else data.decks.push(moved);recomputeDeckTotals();
+}
+function createDeckModal(parentId=null){
+ const parent=parentId?findNode(parentId):null;if(parent&&!parent.children?.length&&parent.cards>0) {toast('Escolha um deck-pai para criar um subdeck.');return;}
+ openModal(`<h3>${parent?'Novo subdeck':'Novo deck'}</h3><div class="field"><label for="newDeckName">Nome</label><input id="newDeckName" placeholder="Ex.: Novo conteúdo"></div><div class="field" style="margin-top:10px"><label for="newDeckCards">Quantidade de cards</label><input id="newDeckCards" type="number" min="0" max="10000000" step="1" value="0"></div><label class="hint" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="createAsSubject"> Criar também uma matéria na fila</label><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="primary" id="createDeck">Adicionar</button></div>`);
+ document.getElementById('createDeck').onclick=()=>{const name=document.getElementById('newDeckName').value.trim(),cards=Number(document.getElementById('newDeckCards').value),asSubject=document.getElementById('createAsSubject').checked;if(!name||!Number.isSafeInteger(cards)||cards<0||cards>MAX_CARDS){toast(`Informe um nome e uma quantidade entre 0 e ${MAX_CARDS.toLocaleString('pt-BR')}.`);return;}if(parentId&&parent&&!parent.children?.length&&parent.cards!==0){toast('Não é possível transformar um subdeck vinculado em deck-pai sem migrar sua matéria.');return;}const id=makeId('deck');const node={id,name,cards};if(parentId){const target=findNode(parentId);target.children=target.children||[];target.children.push(node);recomputeDeckTotals();}else data.decks.push(node);if(asSubject){data.subjects.push({id:makeId('subject'),name,cards,deckIds:[id],status:'queue',progress:0,next:null,prerequisites:[],notBefore:null,activationOrder:0});}recordHistory('deck-created',{id,name},'Deck criado.');closeModal();if(save())toast('Deck adicionado.');};
+}
+function makeId(prefix){let id;do{id=prefix+'-'+(window.crypto&&window.crypto.randomUUID?window.crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8));}while(data.subjects.some(s=>s.id===id)||findNode(id));return id;}
+function createSubjectForDeck(id){const node=findNode(id);if(!node||node.children?.length){toast('Escolha um subdeck sem filhos para associar a uma matéria.');return;}const used=data.subjects.some(s=>collectLeavesForIds(data.decks,s.deckIds).includes(id));if(used){toast('Este deck já está vinculado a uma matéria.');return;}
+ openModal(`<h3>Adicionar matéria ao ciclo</h3><p>Será criada uma matéria na última posição da fila estratégica, vinculada a <strong>${esc(node.name)}</strong>.</p><div class="field"><label for="newSubjectName">Nome da matéria</label><input id="newSubjectName" value="${esc(node.name)}"></div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="primary" id="createSubject">Adicionar à fila</button></div>`);
+ document.getElementById('createSubject').onclick=()=>{const name=document.getElementById('newSubjectName').value.trim();if(!name){toast('Informe um nome.');return;}const fresh=findNode(id);data.subjects.push({id:makeId('subject'),name,cards:fresh.cards,deckIds:[id],status:'queue',progress:0,next:null,prerequisites:[],notBefore:null,activationOrder:0});recordHistory('subject-created',{id,name},'Matéria adicionada à fila estratégica.');promoteNext();closeModal();if(save())toast('Matéria adicionada à fila.');};
+}
+function editDeckTotal(id){
+ const node=findNode(id);if(!node)return;
+ openModal(`<h3>Editar quantidade de cards</h3><p>Atualize o total de cards de <strong>${esc(node.name)}</strong>. Em um deck-pai, o valor será distribuído proporcionalmente entre seus subdecks. O progresso das matérias será preservado.</p><div class="field"><label for="deckTotalInput">Total de cards</label><input id="deckTotalInput" type="number" min="0" max="10000000" step="1" value="${node.cards}"></div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="primary" id="saveDeckTotal">Salvar</button></div>`);
+ document.getElementById('saveDeckTotal').onclick=()=>{const value=Number(document.getElementById('deckTotalInput').value);if(!Number.isSafeInteger(value)||value<0||value>MAX_CARDS){toast(`Informe uma quantidade entre 0 e ${MAX_CARDS.toLocaleString('pt-BR')}.`);return;}setDeckTotal(id,value);closeModal();if(save())toast('Quantidade atualizada e previsões recalculadas.');};
+}
+function suspendNode(id){const node=findNode(id);if(!node)return;const ids=new Set(collectIds(node));const preferred=[];data.subjects.forEach(sub=>{if(sub.deckIds.some(x=>ids.has(x))&&['active','queue'].includes(sub.status)){if(sub.status==='active')preferred.push({id:sub.id,order:sub.activationOrder||0});sub.suspendedFromStatus=sub.status;sub.suspendedActivationOrder=sub.activationOrder||0;sub.status='suspended';sub.activationOrder=0;recordHistory('suspended',sub,'Suspensão pelo deck.');}});promoteNext();if(save())toast('Itens do deck suspensos; vagas reorganizadas.');}
+function resumeNode(id){const node=findNode(id);if(!node)return;const ids=new Set(collectIds(node)),preferred=[];data.subjects.forEach(sub=>{if(sub.deckIds.some(x=>ids.has(x))&&sub.status==='suspended'){if(sub.suspendedFromStatus==='active')preferred.push({id:sub.id,order:sub.suspendedActivationOrder||0});sub.status='queue';delete sub.suspendedFromStatus;delete sub.suspendedActivationOrder;recordHistory('resumed',sub,'Reativação pelo deck.');}});preferred.sort((a,b)=>a.order-b.order);promoteNext(preferred.map(x=>x.id));if(save())toast('Matérias reativadas e fila atualizada.');}
+function confirmDelete(id){const node=findNode(id);if(!node)return;const ids=new Set(collectIds(node)),affected=data.subjects.filter(s=>s.deckIds.some(x=>ids.has(x)));openModal(`<h3>Excluir este deck?</h3><p>Você está prestes a excluir <strong>${esc(node.name)}</strong>${node.children?.length?' e todos os subdecks descendentes':''}.</p><div class="warning">${affected.length} matéria(s) possuem vínculos com este deck. Vínculos restantes serão preservados; matérias sem nenhum deck associado serão removidas do ciclo. A estrutura do Anki não será alterada.</div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="danger" id="reallyDelete">Excluir definitivamente</button></div>`);document.getElementById('reallyDelete').onclick=()=>{closeModal();deleteNode(id);};}
+function deleteNode(id,nodes=data.decks){
+ const node=findNodeIn(nodes,id);if(!node)return false;
+ const removedIds=new Set(collectIds(node)),removedLeaves=new Map(leafNodes(node).map(l=>[l.id,l.cards]));
+ const lostBySubject=new Map();
+ data.subjects.forEach(sub=>{const used=new Set(collectLeavesForIds(data.decks,sub.deckIds));let lost=0;removedLeaves.forEach((cards,leafId)=>{if(used.has(leafId))lost+=cards;});lostBySubject.set(sub.id,lost);});
+ removeNodeFromTree(nodes,id);
+ const removedSubjects=[];
+ data.subjects.forEach(sub=>{
+  sub.deckIds=sub.deckIds.filter(deckId=>!removedIds.has(deckId));
+  if(!sub.deckIds.length){removedSubjects.push(sub);return;}
+  sub.cards=Math.max(0,sub.cards-(lostBySubject.get(sub.id)||0));
+ });
+ const removedSubjectIds=new Set(removedSubjects.map(s=>s.id));
+ removedSubjects.forEach(sub=>recordHistory('deleted',sub,'Matéria removida porque seu último deck associado foi excluído.'));
+ data.subjects=data.subjects.filter(s=>!removedSubjectIds.has(s.id));
+ data.subjects.forEach(sub=>{if(removedSubjectIds.has(sub.next))sub.next=null;sub.prerequisites=(sub.prerequisites||[]).filter(ref=>!removedSubjectIds.has(ref));});
+ recordHistory('deck-deleted',{id,name:node.name},'Deck e descendentes excluídos.');
+ recomputeDeckTotals();promoteNext();if(save())toast('Deck excluído; referências, vagas e calendário atualizados.');return true;
+}
+function renderSettings(){
+ const settings=data.settings;document.getElementById('slots').value=settings.slots;document.getElementById('cardsDay').value=settings.cardsDay;document.getElementById('daysWeek').value=settings.daysWeek;document.getElementById('daysWeek').disabled=true;document.getElementById('startDate').value=settings.startDate;document.getElementById('studyDays').value=settings.studyDays;document.getElementById('customDaysWrap').style.display=settings.studyDays==='custom'?'block':'none';
+ const names=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],checks=document.getElementById('dayChecks');checks.innerHTML='';names.forEach((name,i)=>{const label=el('label','',name);label.style.cssText='display:flex;gap:5px;align-items:center;color:var(--ink-2);font-size:12px';const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=String(i+1);checkbox.checked=settings.customDays.includes(i+1);label.prepend(checkbox);checks.append(label);});
+}
+document.getElementById('studyDays').addEventListener('change',event=>{const mode=event.target.value;document.getElementById('customDaysWrap').style.display=mode==='custom'?'block':'none';const count=mode==='custom'?[...document.querySelectorAll('#dayChecks input:checked')].length:mode==='all'?7:mode==='mon-fri'?5:6;document.getElementById('daysWeek').value=count;});
+document.getElementById('dayChecks').addEventListener('change',()=>{document.getElementById('daysWeek').value=document.querySelectorAll('#dayChecks input:checked').length;});
+document.getElementById('saveSettings').onclick=()=>{
+ const slots=Number(document.getElementById('slots').value),cards=Number(document.getElementById('cardsDay').value),mode=document.getElementById('studyDays').value,custom=[...document.querySelectorAll('#dayChecks input:checked')].map(x=>Number(x.value)),startDate=document.getElementById('startDate').value;
+ if(!Number.isInteger(slots)||slots<1||slots>12||!Number.isInteger(cards)||cards<1||cards>100||!parseDate(startDate)){toast('Confira os valores e a data informados.');return;}if(mode==='custom'&&!custom.length){toast('Selecione ao menos um dia.');return;}
+ data.settings={...data.settings,slots,cardsDay:cards,startDate,studyDays:mode,customDays:custom,daysWeek:mode==='custom'?custom.length:mode==='all'?7:mode==='mon-fri'?5:6};reconcileSlots();calendarCursor=null;recordHistory('settings-updated',null,'Configurações de estudo alteradas.');if(save())toast('Configurações salvas; vagas e previsões recalculadas.');
+};
+document.getElementById('addDeckBtn').onclick=()=>createDeckModal();
+document.getElementById('restoreDefaultsBtn').onclick=()=>{openModal(`<h3>Restaurar estrutura inicial?</h3><p>Isso substitui decks, matérias, histórico, prioridades e configurações atuais pela estrutura original do aplicativo.</p><div class="warning">Exporte um backup antes. Esta operação não poderá ser desfeita automaticamente.</div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="danger" id="restoreNow">Restaurar</button></div>`);document.getElementById('restoreNow').onclick=()=>{data=normalizeData(clone(DEFAULT_DATA));calendarCursor=null;closeModal();if(save())toast('Estrutura inicial restaurada.');};};
+function exportData(){const backup={app:'Meu Ciclo',schemaVersion:SCHEMA_VERSION,exportedAt:new Date().toISOString(),data:clone(data)};const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='meu-ciclo-backup.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function importData(file){
+ const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(reader.result);let candidate=normalizeData(parsed);candidate=normalizeData(applyStrategyMigration(candidate));const serialized=JSON.stringify(candidate);localStorage.setItem(STORAGE_KEY,serialized);data=candidate;lastPersisted=clone(candidate);calendarCursor=null;closeModal();render();toast('Backup validado e importado.');}catch(error){toast('Backup rejeitado; dados atuais preservados. '+(error?.message||''));}finally{document.getElementById('importFile').value='';}};reader.onerror=()=>toast('Não foi possível ler o arquivo de backup.');reader.readAsText(file);
+}
+document.getElementById('exportBtn').onclick=exportData;document.getElementById('backupBtn').onclick=exportData;document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();document.getElementById('importFile').onchange=event=>{if(event.target.files[0])importData(event.target.files[0]);};
+document.getElementById('resetBtn').onclick=()=>{openModal(`<h3>Apagar todos os dados?</h3><p>Isso apaga o progresso, a estrutura e as configurações salvas neste navegador.</p><div class="warning">Exporte um backup antes, se quiser guardar seu planejamento.</div><div class="modalActions"><button class="secondary" data-close>Cancelar</button><button class="danger" id="resetNow">Apagar tudo</button></div>`);document.getElementById('resetNow').onclick=()=>{data=normalizeData(clone(DEFAULT_DATA));calendarCursor=null;closeModal();if(save())toast('Dados reiniciados.');};};
+function render(){renderHome();renderCycle();renderTree();renderCalendar();renderSettings();}
+render();
+if(storageWarning)toast('Não foi possível validar os dados salvos. Uma cópia de recuperação foi preservada; o app abriu com a estrutura inicial.');
+(function(){const now=new Date(),dateText=now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long'}),homeDate=document.getElementById('homeDate'),headerDate=document.getElementById('headerDate');if(homeDate)homeDate.textContent=dateText.toUpperCase();if(headerDate)headerDate.textContent='PLANEJAMENTO · '+now.getFullYear();})();
+
+</script>
+</body>
+</html>
